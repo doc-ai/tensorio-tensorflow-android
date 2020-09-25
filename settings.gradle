@@ -1,0 +1,3 @@
+include ':tensorflow'
+include ':javaexample'
+rootProject.name = "TensorIO TensorFlow"
