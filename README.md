@@ -2,10 +2,12 @@
 
 ## Requirements:
 
-Ensure the following have been installed in Android Studio's Preferences: Appearance and Behavoir > System Settings > Android SDK > SDK Tools. Click on Show Package Contents at the bottom right and expand the NDK and CMake options to select the appropriate packages.
+Ensure the following have been installed in Android Studio:
 
 - Android NDK 19.2.5345600
 - Android Cmake 3.4.1+
+
+You can do this in Preferences: Appearance and Behavoir > System Settings > Android SDK > SDK Tools. Click on Show Package Contents at the bottom right and expand the NDK and CMake options to select the appropriate packages.
 
 ## Installation
 
@@ -45,6 +47,8 @@ distribution/tensorflow/lib/
     └── libtensorflow-core.a
 ```
 
+You may need to create the *lib* directory inside *distribution/tensorflow/* yourself.
+
 ## Running the App
 
-After you have done this, simply open the project folder in Android Studio let gradle and all that jazz do its job, select the app configuration, which is probably selected by default, and select an x86 or x86_64 emulator or an Android device, then press play.
+After you have done this, simply open the project folder in Android Studio, let gradle and all that jazz do its job, select the app configuration, which is probably selected by default, select an x86 or x86_64 emulator or an Android device, and press play.
