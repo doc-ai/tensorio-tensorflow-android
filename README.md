@@ -5,7 +5,7 @@
 Ensure the following have been installed in Android Studio:
 
 - Android NDK 19.2.5345600
-- Android Cmake 3.4.1+
+- Android Cmake 3.10.2
 
 You can do this in Preferences: Appearance and Behavoir > System Settings > Android SDK > SDK Tools. Click on Show Package Contents at the bottom right and expand the NDK and CMake options to select the appropriate packages.
 
@@ -14,7 +14,7 @@ You can do this in Preferences: Appearance and Behavoir > System Settings > Andr
 The binary libs used by this project are not included in the GitHub repo. Libraries for three architectures are available. Download all of them from:
 
 ```
-gs://tensorio-build/android/release/1.15/ndk/19.2.5345600/api/22/arch/
+gs://tensorio-build/android/release/2.0/ndk/19.2.5345600/api/22/arch/
   arm64-v8a/
     libnsync.a
     libprotobuf.so
