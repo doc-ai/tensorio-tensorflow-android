@@ -64,15 +64,15 @@ Java_ai_doc_tensorflow_Test_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
 
-    // Tensorflow Initialization
+    // TensorFlow Initialization
 
-    int argc = 1;
-    char **argv = new_argv(1, "native-lib");
-
-    tensorflow::port::InitMain(argv[0], &argc, &argv);
-
-    tensorflow::SessionOptions options;
-    std::unique_ptr<tensorflow::Session> session(NewSession(options));
+//    int argc = 1;
+//    char **argv = new_argv(1, "native-lib");
+//
+//    tensorflow::port::InitMain(argv[0], &argc, &argv);
+//
+//    tensorflow::SessionOptions options;
+//    std::unique_ptr<tensorflow::Session> session(NewSession(options));
 
     // Write and Read a Tensor
 
