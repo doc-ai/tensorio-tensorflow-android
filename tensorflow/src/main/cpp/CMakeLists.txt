@@ -32,7 +32,7 @@ set_target_properties(libtensorflow-core PROPERTIES IMPORTED_LOCATION ${distribu
 
 ## LOCAL LIBRARY ##
 
-add_library(native-lib SHARED native-lib.cpp)
+add_library(native-lib SHARED native-lib.cpp saved_model_bundle_jni.cpp)
 
 ## HEADER SEARCH PATHS ##
 
