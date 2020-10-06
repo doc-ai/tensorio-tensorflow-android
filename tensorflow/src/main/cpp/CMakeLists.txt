@@ -32,18 +32,18 @@ set_target_properties(libtensorflow-core PROPERTIES IMPORTED_LOCATION ${distribu
 
 ## LOCAL LIBRARY ##
 
-add_library(native-lib SHARED native-lib.cpp saved_model_bundle_jni.cpp)
+add_library(tensorio-tensorflow SHARED jni_utils.cpp saved_model_bundle_jni.cpp)
 
 ## HEADER SEARCH PATHS ##
 
-target_include_directories(native-lib PRIVATE ${distribution_DIR}/tensorflow/include)
+target_include_directories(tensorio-tensorflow PRIVATE ${distribution_DIR}/tensorflow/include)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries(
-        native-lib
+        tensorio-tensorflow
         android
         libtensorflow-core
         libprotobuf

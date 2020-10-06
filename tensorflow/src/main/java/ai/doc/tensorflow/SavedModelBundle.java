@@ -8,53 +8,27 @@ public class SavedModelBundle implements AutoCloseable {
         NativeLibrary.load();
     }
 
-    // Public Constructor
-
-    // TODO: Implement normal constructor and then access private handle directly from JNI
-
-    public SavedModelBundle(File file) {
-
-    }
-
-    public static SavedModelBundle load(File file) {
-        return load(file.getPath() + "/predict");
-    }
-
-    // Public Methods
-
-    public String run() {
-        return run(handle);
-    }
-
-    public void unload() {
-        unload(handle);
-    }
-
-    // JNI Memory Management
-
-    /** The pointer to the underlying SavedModelBundle **/
-
-    private long handle;
-
-    private SavedModelBundle(long handle) {
-        this.handle = handle;
-    }
-
-    private static SavedModelBundle fromHandle(long handle) {
-        return new SavedModelBundle(handle);
-    }
-
     @Override
     public void close() throws Exception {
         unload();
     }
 
-    // Native Methods
+    // Public Constructor
 
-    private static native SavedModelBundle load(String dir);
+    public SavedModelBundle(File file) {
+        load(file.getPath() + "/predict");
+    }
 
-    private native void unload(long handle);
+    // Java Native Interface
 
-    private native String run(long handle);
+    /** The pointer to the underlying SavedModelBundle **/
+
+    private long handle;
+
+    private native void load(String dir);
+
+    private native void unload();
+
+    public native String run();
 
 }

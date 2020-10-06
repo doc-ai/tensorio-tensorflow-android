@@ -10,7 +10,6 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.IOException;
 
-import ai.doc.tensorflow.Test;
 import ai.doc.tensorflow.AndroidAssets;
 import ai.doc.tensorflow.SavedModelBundle;
 
@@ -33,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         this.tv = findViewById(R.id.sample_text);
-
-        // Test t = new Test();
-        // tv.setText(t.stringFromJNI());
     }
 
     @Override
@@ -54,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     public void onLoadModel(View view) {
         try {
             File file = bundleForFile("1_in_1_out_number_test.tiobundle");
-            this.savedModelBundle = SavedModelBundle.load(file);
+            this.savedModelBundle = new SavedModelBundle(file);
             tv.setText("Model is loaded");
         } catch (IOException e) {
             Log.v(TAG, "Exception: bundleForFile");
@@ -67,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onUnloadModel(View view) {
-        this.savedModelBundle.unload();
+        this.savedModelBundle = null;
         tv.setText("Model is not loaded");
     }
 
