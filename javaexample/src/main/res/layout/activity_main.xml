@@ -6,6 +6,37 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/load_model"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:onClick="onLoadModel"
+        android:text="Load Model"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/run_model"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:onClick="onRunModel"
+        android:text="Run Model"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/load_model" />
+
+    <Button
+        android:id="@+id/unload_model"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:onClick="onUnloadModel"
+        android:text="Unload Model"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/run_model" />
+
     <TextView
         android:id="@+id/sample_text"
         android:layout_width="wrap_content"
@@ -14,6 +45,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/unload_model" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

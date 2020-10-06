@@ -68,8 +68,10 @@ public class SavedModelBundleTest {
             File file = bundleForFile("1_in_1_out_number_test.tiobundle");
             assertNotNull(file);
 
-            SavedModelBundle model = new SavedModelBundle(file);
+            SavedModelBundle model = SavedModelBundle.load(file);
             assertNotNull(model);
+
+            model.run();
 
         } catch (IOException e) {
             e.printStackTrace();
