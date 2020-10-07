@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.FileSystemException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 

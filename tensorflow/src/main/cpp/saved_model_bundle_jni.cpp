@@ -54,14 +54,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_ai_doc_tensorflow_SavedModelBundle_delete(JNIEnv *env, jobject thiz /*, jlong handle*/) {
     auto saved_model_bundle = getHandle<tensorflow::SavedModelBundle>(env, thiz);
-    tensorflow::Status status;
-
-    // TensorFlow: Unload Model
-
-    status = saved_model_bundle->session->Close();
-
-    // Cleanup
-
+    tensorflow::Status status = saved_model_bundle->session->Close();
     delete saved_model_bundle;
 }
 

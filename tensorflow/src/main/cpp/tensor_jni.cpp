@@ -10,6 +10,11 @@
 
 #include "jni_utils.h"
 
+// tensor->flat<float_t>()
+// tensor->flat<uint8_t>()
+// tensor->flat<int32_t>()
+// tensor->flat<int64_t>()
+
 jstring GetTensorName(JNIEnv *env, jobject obj) {
     jclass c = env->GetObjectClass(obj);
     jfieldID fieldId = env->GetFieldID(c, "name", "Ljava/lang/String;");
@@ -18,18 +23,28 @@ jstring GetTensorName(JNIEnv *env, jobject obj) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_ai_doc_tensorflow_Tensor_create(JNIEnv *env, jobject thiz) {
+Java_ai_doc_tensorflow_Tensor_create(JNIEnv *env, jobject thiz, jint dtype, jintArray shape) {
 
-    // TODO: Get dimensions
-    // TODO: Get type
+    // Prepare Shape
 
     std::vector<tensorflow::int64> dims;
-    dims.push_back(1);
+    jint *jShape = env->GetIntArrayElements(shape, nullptr);
+    jsize shapeCount = env->GetArrayLength(shape);
+
+    for (jsize i = 0; i < shapeCount; i++) {
+        dims.push_back(jShape[i]);
+    }
 
     tensorflow::gtl::ArraySlice<tensorflow::int64> dim_sizes(dims);
-    auto shape = tensorflow::TensorShape(dim_sizes);
+    auto tensorShape = tensorflow::TensorShape(dim_sizes);
 
-    auto tensor = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape);
+    // Prepare Data Type
+
+    auto tensorType = static_cast<tensorflow::DataType>(dtype);
+
+    // Create Tensor
+
+    auto tensor = new tensorflow::Tensor(tensorType, tensorShape);
 
     // JNI Memory Management
 
@@ -39,13 +54,14 @@ Java_ai_doc_tensorflow_Tensor_create(JNIEnv *env, jobject thiz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_ai_doc_tensorflow_Tensor_delete(JNIEnv *env, jobject thiz) {
-    auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
-    delete tensor;
+    delete getHandle<tensorflow::Tensor>(env, thiz);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src, jlong size) {
+    // TODO: flat depends on dtype
+
     auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
     auto flat_tensor = tensor->flat<float_t>();
     auto buffer = flat_tensor.data();
@@ -70,9 +86,16 @@ Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src,
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size) {
+    // TODO: flat depends on dtype
+
     auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
     auto flat_tensor = tensor->flat<float_t>();
     auto buffer = flat_tensor.data();
+
+    // tensor->flat<float_t>()
+    // tensor->flat<uint8_t>()
+    // tensor->flat<int32_t>()
+    // tensor->flat<int64_t>()
 
     return env->NewDirectByteBuffer(buffer, size);
 }

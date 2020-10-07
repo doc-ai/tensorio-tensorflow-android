@@ -2,8 +2,6 @@
 // Reference:
 // See org.tensorflow.lite.Tensor
 
-// TODO: I think it's much more likely we store a byte array and then build the tensor in cpp as needed
-
 package ai.doc.tensorflow;
 
 import java.nio.ByteBuffer;
@@ -112,23 +110,19 @@ public class Tensor implements AutoCloseable {
 
     private void createBackingTensor() {
         if (!isBacked) {
-            create();
+            create(dtype.c(), shape);
         }
     }
 
     // Java Native Interface
 
-    /**
-     * The pointer to the underlying Tensor. The underlying tensor will be created via java methods
-     * if the user writes data to the tensor before sending it into a model. Otherwise the underlying
-     * tensor will be created from c++ when reading data out of a model.
-     * */
+    /** The pointer to the underlying Tensor. */
 
     private long handle = 0;
 
     /** Allocates a tensorflow Tensor and backs this instance with it */
 
-    private native void create();
+    private native void create(int dtype, int[] shape);
 
     /** Frees the memory associated with the underlying tensorflow Tensor */
 

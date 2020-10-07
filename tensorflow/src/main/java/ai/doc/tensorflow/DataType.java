@@ -21,21 +21,23 @@ package ai.doc.tensorflow;
 
 /** Represents the type of elements in a TensorFlow Lite {@link Tensor} as an enum. */
 
+// See types.pb.h for tensorflow::DataType values
+
 public enum DataType {
-    /** 32-bit single precision floating point. */
+    /** 32-bit single precision floating point. DT_FLOAT = 1 */
     FLOAT32(1),
 
-    /** 32-bit signed integer. */
-    INT32(2),
+    /** 32-bit signed integer. DT_INT32 = 3 */
+    INT32(3),
 
-    /** 8-bit unsigned integer. */
-    UINT8(3),
+    /** 8-bit unsigned integer. DT_UINT8 = 4 */
+    UINT8(4),
 
-    /** 64-bit signed integer. */
-    INT64(4),
+    /** 64-bit signed integer. DT_INT64 = 9 */
+    INT64(9),
 
-    /** Strings. */
-    STRING(5);
+    /** Strings. DT_STRING = 7 */
+    STRING(7);
 
     private final int value;
 
