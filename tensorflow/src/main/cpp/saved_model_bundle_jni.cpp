@@ -67,26 +67,35 @@ Java_ai_doc_tensorflow_SavedModelBundle_delete(JNIEnv *env, jobject thiz /*, jlo
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_ai_doc_tensorflow_SavedModelBundle_run(JNIEnv *env, jobject thiz, jobject inputTensor, jobject outputTensor) {
+Java_ai_doc_tensorflow_SavedModelBundle_run(JNIEnv *env, jobject thiz, jobjectArray inputTensors, jobjectArray outputTensors) {
     auto saved_model_bundle = getHandle<tensorflow::SavedModelBundle>(env, thiz);
-    auto input_tensor = *getHandle<tensorflow::Tensor>(env, inputTensor);
     tensorflow::Status status;
 
-    // Tensor Names
-
-    auto input_name = jstring2string(env, GetTensorName(env, inputTensor));
-    auto output_name = jstring2string(env, GetTensorName(env, outputTensor));
-
     // Prepare Inputs
+    // Inputs are pairs of names and tensors
 
-    auto input = std::pair<std::string, tensorflow::Tensor>(input_name, input_tensor);
     std::vector<std::pair<std::string, tensorflow::Tensor>> inputs;
-    inputs.push_back(input);
+    jsize inputCount = env->GetArrayLength(inputTensors);
+
+    for (jsize i = 0; i < inputCount; i++) {
+        jobject inputTensor = env->GetObjectArrayElement(inputTensors, i);
+        auto input_tensor = *getHandle<tensorflow::Tensor>(env, inputTensor);
+        auto input_name = jstring2string(env, GetTensorName(env, inputTensor));
+        auto input = std::pair<std::string, tensorflow::Tensor>(input_name, input_tensor);
+        inputs.push_back(input);
+    }
 
     // Prepare Outputs
+    // We request outputs by name only but also provide a vector to capture them
 
     std::vector<std::string> output_names;
-    output_names.push_back(output_name);
+    jsize outputCount = env->GetArrayLength(outputTensors);
+
+    for (jsize i = 0; i < outputCount; i++) {
+        jobject outputTensor = env->GetObjectArrayElement(outputTensors, i);
+        auto output_name = jstring2string(env, GetTensorName(env, outputTensor));
+        output_names.push_back(output_name);
+    }
 
     std::vector<tensorflow::Tensor> outputs;
 
@@ -103,9 +112,14 @@ Java_ai_doc_tensorflow_SavedModelBundle_run(JNIEnv *env, jobject thiz, jobject i
 
     // Get Outputs
 
-    auto output = outputs[0];
-    auto outputPtr = new tensorflow::Tensor(output); // TODO: Avoid copying?
-    setHandle<tensorflow::Tensor>(env, outputTensor, outputPtr);
+    assert(outputCount == outputs.size());
+
+    for (jsize i = 0; i < outputs.size(); i++) {
+        jobject outputTensor = env->GetObjectArrayElement(outputTensors, i);
+        auto output = outputs[i]; // TODO: Avoid copying?
+        auto outputPtr = new tensorflow::Tensor(output);
+        setHandle<tensorflow::Tensor>(env, outputTensor, outputPtr);
+    }
 }
 
 // Reference Code

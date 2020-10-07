@@ -37,8 +37,8 @@ public class SavedModelBundle implements AutoCloseable {
 
     private native void delete();
 
-    /** TESTING: Runs the model with a single input and output tensor **/
+    /** Runs the model with input and output tensors **/
 
-    public native void run(Tensor input, Tensor output);
+    public native void run(Tensor[] inputs, Tensor[] outputs);
 
 }

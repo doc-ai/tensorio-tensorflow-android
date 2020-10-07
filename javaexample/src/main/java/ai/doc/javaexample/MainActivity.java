@@ -62,13 +62,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRunModel(View view) {
-        Tensor inputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-        inputTensor.setFloatValue(2);
+        Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
+        input.setFloatValue(2);
 
-        Tensor outputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
+        Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
 
-        this.savedModelBundle.run(inputTensor, outputTensor);
-        tv.setText(String.valueOf(outputTensor.getFloatValue()));
+        Tensor[] inputs = {input};
+        Tensor[] outputs = {output};
+
+        this.savedModelBundle.run(inputs, outputs);
+        tv.setText(String.valueOf(output.getFloatValue()));
     }
 
     public void onUnloadModel(View view) {

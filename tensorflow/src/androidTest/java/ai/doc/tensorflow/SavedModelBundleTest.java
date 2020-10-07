@@ -73,12 +73,15 @@ public class SavedModelBundleTest {
             SavedModelBundle model = new SavedModelBundle(modelDir);
             assertNotNull(model);
 
-            Tensor inputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-            inputTensor.setFloatValue(2);
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
+            input.setFloatValue(2);
 
-            Tensor outputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
 
-            model.run(inputTensor, outputTensor);
+            Tensor[] inputs = {input};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
 
         } catch (IOException e) {
             e.printStackTrace();
