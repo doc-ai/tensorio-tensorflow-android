@@ -32,7 +32,10 @@ set_target_properties(libtensorflow-core PROPERTIES IMPORTED_LOCATION ${distribu
 
 ## LOCAL LIBRARY ##
 
-add_library(tensorio-tensorflow SHARED jni_utils.cpp saved_model_bundle_jni.cpp)
+add_library(tensorio-tensorflow SHARED
+        jni_utils.cpp
+        tensor_jni.cpp
+        saved_model_bundle_jni.cpp)
 
 ## HEADER SEARCH PATHS ##
 

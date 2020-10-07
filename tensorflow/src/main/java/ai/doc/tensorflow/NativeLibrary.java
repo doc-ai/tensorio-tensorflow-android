@@ -1,7 +1,7 @@
 package ai.doc.tensorflow;
 
 public class NativeLibrary {
-    public static void load() {
+    public static void init() {
         System.loadLibrary("tensorio-tensorflow");
     }
 }

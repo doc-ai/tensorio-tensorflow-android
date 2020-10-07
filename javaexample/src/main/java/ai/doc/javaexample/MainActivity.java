@@ -11,7 +11,9 @@ import java.io.File;
 import java.io.IOException;
 
 import ai.doc.tensorflow.AndroidAssets;
+import ai.doc.tensorflow.DataType;
 import ai.doc.tensorflow.SavedModelBundle;
+import ai.doc.tensorflow.Tensor;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -58,8 +60,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRunModel(View view) {
-        String result = this.savedModelBundle.run();
-        tv.setText(result);
+        Tensor tensor = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
+        tensor.setFloatValue(2);
+
+        Tensor result = this.savedModelBundle.runTensor(tensor);
+        tv.setText(String.valueOf(result.getFloatValue()));
     }
 
     public void onUnloadModel(View view) {
