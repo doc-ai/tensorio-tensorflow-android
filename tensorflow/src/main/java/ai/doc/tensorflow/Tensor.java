@@ -76,8 +76,9 @@ public class Tensor implements AutoCloseable {
 
     public void setBytes(ByteBuffer buffer) {
         assert (buffer.isDirect() && buffer.order() == ByteOrder.nativeOrder());
+
         createBackingTensor();
-        writeBytes(buffer, size());
+        writeBytes(buffer, size(), dtype.c());
     }
 
     /**
@@ -87,7 +88,7 @@ public class Tensor implements AutoCloseable {
      */
 
     public ByteBuffer getBytes() {
-        return readBytes(size()).order(ByteOrder.nativeOrder());
+        return readBytes(size(), dtype.c()).order(ByteOrder.nativeOrder());
     }
 
     // Private Variables
@@ -130,9 +131,9 @@ public class Tensor implements AutoCloseable {
 
     /** Writes bytes to the backing tensor */
 
-    private native void writeBytes(ByteBuffer buffer, long size);
+    private native void writeBytes(ByteBuffer buffer, long size, int dtype);
 
     /** Reads bytes from the backing tensor */
 
-    private native ByteBuffer readBytes(long size);
+    private native ByteBuffer readBytes(long size, int dtype);
 }

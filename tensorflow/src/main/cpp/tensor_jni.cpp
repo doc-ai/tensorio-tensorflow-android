@@ -10,11 +10,6 @@
 
 #include "jni_utils.h"
 
-// tensor->flat<float_t>()
-// tensor->flat<uint8_t>()
-// tensor->flat<int32_t>()
-// tensor->flat<int64_t>()
-
 jstring GetTensorName(JNIEnv *env, jobject obj) {
     jclass c = env->GetObjectClass(obj);
     jfieldID fieldId = env->GetFieldID(c, "name", "Ljava/lang/String;");
@@ -59,18 +54,41 @@ Java_ai_doc_tensorflow_Tensor_delete(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src, jlong size) {
-    // TODO: flat depends on dtype
-
+Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src, jlong size, jint dtype) {
     auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
-    auto flat_tensor = tensor->flat<float_t>();
-    auto buffer = flat_tensor.data();
+    auto tensorType = static_cast<tensorflow::DataType>(dtype);
+    void *buffer = nullptr;
 
     char* src_data_raw = static_cast<char*>(env->GetDirectBufferAddress(src));
 
     if (!src_data_raw) {
         ThrowException(env, kIllegalArgumentException,"Input ByteBuffer is not a direct buffer");
         return;
+    }
+
+    // TODO: Int64 DTYPE support which iOS build supports?
+
+    switch (tensorType) {
+        case tensorflow::DT_FLOAT: {
+            auto flat = tensor->flat<float_t>();
+            buffer = flat.data();
+            break;
+        }
+        case tensorflow::DT_UINT8: {
+            auto flat = tensor->flat<uint8_t>();
+            buffer = flat.data();
+            break;
+        }
+        case tensorflow::DT_INT32: {
+            auto flat = tensor->flat<int32_t>();
+            buffer = flat.data();
+            break;
+        }
+//        case tensorflow::DT_INT64: {
+//            auto flat = tensor->flat<int64_t>();
+//            buffer = flat.data();
+//            break;
+//        }
     }
 
     // works
@@ -85,21 +103,38 @@ Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src,
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size) {
-    // TODO: flat depends on dtype
-
+Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size, jint dtype) {
     auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
-    auto flat_tensor = tensor->flat<float_t>();
-    auto buffer = flat_tensor.data();
+    auto tensorType = static_cast<tensorflow::DataType>(dtype);
+    void *buffer = nullptr;
 
-    // tensor->flat<float_t>()
-    // tensor->flat<uint8_t>()
-    // tensor->flat<int32_t>()
-    // tensor->flat<int64_t>()
+    // TODO: Int64 DTYPE support which iOS build supports?
+
+    switch (tensorType) {
+        case tensorflow::DT_FLOAT: {
+            auto flat = tensor->flat<float_t>();
+            buffer = flat.data();
+            break;
+        }
+        case tensorflow::DT_UINT8: {
+            auto flat = tensor->flat<uint8_t>();
+            buffer = flat.data();
+            break;
+        }
+        case tensorflow::DT_INT32: {
+            auto flat = tensor->flat<int32_t>();
+            buffer = flat.data();
+            break;
+        }
+//        case tensorflow::DT_INT64: {
+//            auto flat = tensor->flat<int64_t>();
+//            buffer = flat.data();
+//            break;
+//        }
+    }
 
     return env->NewDirectByteBuffer(buffer, size);
 }
-
 
 
 // Reference Code
