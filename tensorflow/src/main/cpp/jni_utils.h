@@ -6,6 +6,7 @@
 #define TENSORIO_TENSORFLOW_JNI_UTILS_H
 
 #include <jni.h>
+#include <string>
 
 // Native Handles
 // See http://www.studiofuga.com/2017/03/10/a-c-smart-pointer-wrapper-for-use-with-jni/
@@ -30,6 +31,10 @@ void setHandle(JNIEnv *env, jobject obj, T *t)
     jlong handle = reinterpret_cast<jlong>(t);
     env->SetLongField(obj, getHandleField(env, obj), handle);
 }
+
+// Conversion Utilities
+
+std::string jstring2string(JNIEnv *env, jstring javaString);
 
 // Exceptions
 // See tensorflow/tflite/java

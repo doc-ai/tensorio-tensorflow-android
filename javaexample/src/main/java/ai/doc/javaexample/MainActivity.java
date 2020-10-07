@@ -51,8 +51,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onLoadModel(View view) {
         try {
-            File file = bundleForFile("1_in_1_out_number_test.tiobundle");
-            this.savedModelBundle = new SavedModelBundle(file);
+            File tioBundle = bundleForFile("1_in_1_out_number_test.tiobundle");
+            File modelDir = new File(tioBundle, "predict");
+
+            this.savedModelBundle = new SavedModelBundle(modelDir);
             tv.setText("Model is loaded");
         } catch (IOException e) {
             Log.v(TAG, "Exception: bundleForFile");
@@ -60,11 +62,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRunModel(View view) {
-        Tensor tensor = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-        tensor.setFloatValue(2);
+        Tensor inputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
+        inputTensor.setFloatValue(2);
 
-        Tensor result = this.savedModelBundle.runTensor(tensor);
-        tv.setText(String.valueOf(result.getFloatValue()));
+        Tensor outputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
+
+        this.savedModelBundle.run(inputTensor, outputTensor);
+        tv.setText(String.valueOf(outputTensor.getFloatValue()));
     }
 
     public void onUnloadModel(View view) {

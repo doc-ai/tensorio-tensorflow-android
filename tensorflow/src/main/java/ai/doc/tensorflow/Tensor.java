@@ -6,6 +6,13 @@
 
 package ai.doc.tensorflow;
 
+/**
+ * A Tensor is backed by an underlying TensorFlow Tensor that is either prepared in advance of
+ * sending it into a model or read as an output from the model. The Java object encapsulates
+ * information about the tensor such as its data type, shape, and name that is needed to construct
+ * the backing object or properly read it from the model.
+ */
+
 public class Tensor implements AutoCloseable {
 
     static {
@@ -23,16 +30,6 @@ public class Tensor implements AutoCloseable {
         this.dtype = dtype;
         this.shape = shape;
         this.name = name;
-        create();
-    }
-
-    // Private Constructor (remove)
-
-    private Tensor(DataType dtype, int[] shape, String name, long handle) {
-        this.dtype = dtype;
-        this.shape = shape;
-        this.name = name;
-        this.handle = handle;
     }
 
     /** Returns the {@link DataType} of elements stored in the Tensor */
@@ -56,6 +53,7 @@ public class Tensor implements AutoCloseable {
     /** TESTING */
 
     public void setFloatValue(float value) {
+        createBackingTensor();
         writeFloat(value);
     }
 
@@ -77,11 +75,25 @@ public class Tensor implements AutoCloseable {
 
     private final String name;
 
+    // Private Methods
+
+    private boolean isBacked = false;
+
+    private void createBackingTensor() {
+        if (!isBacked) {
+            create();
+        }
+    }
+
     // Java Native Interface
 
-    /** The pointer to the underlying Tensor */
+    /**
+     * The pointer to the underlying Tensor. The underlying tensor will be created via java methods
+     * if the user writes data to the tensor before sending it into a model. Otherwise the underlying
+     * tensor will be created from c++ when reading data out of a model.
+     * */
 
-    private long handle;
+    private long handle = 0;
 
     /** Allocates a tensorflow Tensor and backs this instance with it */
 

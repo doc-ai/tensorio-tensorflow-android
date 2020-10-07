@@ -17,8 +17,10 @@ public class SavedModelBundle implements AutoCloseable {
 
     // Public Constructor
 
+    /** Instantiates a model in the Saved Model format with a directory at the file path */
+
     public SavedModelBundle(File file) {
-        create(file.getPath() + "/predict");
+        create(file.getPath());
     }
 
     // Java Native Interface
@@ -35,12 +37,8 @@ public class SavedModelBundle implements AutoCloseable {
 
     private native void delete();
 
-    /** Runs the model */
+    /** TESTING: Runs the model with a single input and output tensor **/
 
-    public native String run();
-
-    /** TESTING **/
-
-    public native Tensor runTensor(Tensor tensor);
+    public native void run(Tensor input, Tensor output);
 
 }

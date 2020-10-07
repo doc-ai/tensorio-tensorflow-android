@@ -22,37 +22,11 @@ jobject DataType(JNIEnv *env, const char* name) {
     return env->GetStaticObjectField(klass, fieldId);
 }
 
-tensorflow::Tensor CreateTensor(float value) {
-    std::vector<tensorflow::int64> dims;
-    dims.push_back(1);
-
-    tensorflow::gtl::ArraySlice<tensorflow::int64> dim_sizes(dims);
-    tensorflow::TensorShape shape = tensorflow::TensorShape(dim_sizes);
-    tensorflow::Tensor tensor(tensorflow::DT_FLOAT, shape);
-
-    auto flat_tensor = tensor.flat<float_t>();
-    auto buffer = flat_tensor.data();
-
-    buffer[0] = value;
-
-    return tensor;
-}
-
-float ReadTensor(tensorflow::Tensor tensor) {
-    auto flat_tensor = tensor.flat<float_t>();
-    auto buffer = flat_tensor.data();
-    float val = buffer[0];
-
-    return val;
-}
-
 extern "C"
 JNIEXPORT void JNICALL
 Java_ai_doc_tensorflow_SavedModelBundle_create(JNIEnv *env, jobject thiz, jstring dir) {
     auto saved_model_bundle = new tensorflow::SavedModelBundle();
-
-    const char *c_dir = env->GetStringUTFChars(dir, nullptr);
-    std::string s_dir = c_dir;
+    auto sDir = jstring2string(env, dir);
 
     // TensorFlow: Load Model
 
@@ -62,7 +36,7 @@ Java_ai_doc_tensorflow_SavedModelBundle_create(JNIEnv *env, jobject thiz, jstrin
     tensorflow::RunOptions run_opts;
     tensorflow::Status status;
 
-    status = LoadSavedModel(session_opts, run_opts, s_dir, tags, saved_model_bundle);
+    status = LoadSavedModel(session_opts, run_opts, sDir, tags, saved_model_bundle);
 
     if ( status != tensorflow::Status::OK() ) {
         __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "LoadSavedModel Status not OK");
@@ -73,10 +47,6 @@ Java_ai_doc_tensorflow_SavedModelBundle_create(JNIEnv *env, jobject thiz, jstrin
     // JNI Memory Management
 
     setHandle<tensorflow::SavedModelBundle>(env, thiz, saved_model_bundle);
-
-    // Cleanup
-
-    env->ReleaseStringUTFChars(dir, c_dir);
     saved_model_bundle = nullptr;
 }
 
@@ -95,107 +65,87 @@ Java_ai_doc_tensorflow_SavedModelBundle_delete(JNIEnv *env, jobject thiz /*, jlo
     delete saved_model_bundle;
 }
 
-
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_ai_doc_tensorflow_SavedModelBundle_run(JNIEnv *env, jobject thiz /*, jlong handle*/) {
+JNIEXPORT void JNICALL
+Java_ai_doc_tensorflow_SavedModelBundle_run(JNIEnv *env, jobject thiz, jobject inputTensor, jobject outputTensor) {
     auto saved_model_bundle = getHandle<tensorflow::SavedModelBundle>(env, thiz);
+    auto input_tensor = *getHandle<tensorflow::Tensor>(env, inputTensor);
     tensorflow::Status status;
 
-    // TensorFlow: Run Model
+    // Tensor Names
 
-    tensorflow::Tensor input_tensor = CreateTensor(2);
-    std::vector<tensorflow::Tensor> outputs;
+    auto input_name = jstring2string(env, GetTensorName(env, inputTensor));
+    auto output_name = jstring2string(env, GetTensorName(env, outputTensor));
 
-    std::string input_name = "input";
-    std::string output_name = "output";
+    // Prepare Inputs
 
-    std::pair<std::string, tensorflow::Tensor> input = std::pair<std::string, tensorflow::Tensor>(input_name, input_tensor);
+    auto input = std::pair<std::string, tensorflow::Tensor>(input_name, input_tensor);
     std::vector<std::pair<std::string, tensorflow::Tensor>> inputs;
     inputs.push_back(input);
 
-    std::vector<std::string> output_names;
-    output_names.push_back(output_name);
-
-    tensorflow::Session *session = saved_model_bundle->session.get();
-    status = session->Run(inputs, output_names, {}, &outputs);
-
-    if ( status != tensorflow::Status::OK() ) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s", status.error_message().c_str());
-        ThrowException(env, kIllegalArgumentException,"Internal error: Unable to run model.");
-        return nullptr;
-    }
-
-    tensorflow::Tensor output = outputs[0];
-    float value = ReadTensor(output);
-
-    std::string hello = "The value is: " + std::to_string(value);
-    return env->NewStringUTF(hello.c_str());
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_ai_doc_tensorflow_SavedModelBundle_runTensor(JNIEnv *env, jobject thiz, jobject tensor) {
-    auto saved_model_bundle = getHandle<tensorflow::SavedModelBundle>(env, thiz);
-    auto input_tensor = *getHandle<tensorflow::Tensor>(env, tensor);
-    tensorflow::Status status;
-
-    // Get name of input tensor
-
-    jstring input_name_jstring = GetTensorName(env, tensor);
-    const char *input_name_chars = env->GetStringUTFChars(input_name_jstring, nullptr);
-    std::string input_name = input_name_chars;
-
-    env->ReleaseStringUTFChars(input_name_jstring, input_name_chars);
-
-    // Prepare inputs
-
-    std::pair<std::string, tensorflow::Tensor> input = std::pair<std::string, tensorflow::Tensor>(
-            input_name, input_tensor);
-    std::vector<std::pair<std::string, tensorflow::Tensor>> inputs;
-    inputs.push_back(input);
-
-    // Get name of output tensor
-
-    std::string output_name = "output";
-
-    // Prepare output names
+    // Prepare Outputs
 
     std::vector<std::string> output_names;
     output_names.push_back(output_name);
 
     std::vector<tensorflow::Tensor> outputs;
 
-    tensorflow::Session *session = saved_model_bundle->session.get();
+    // Run Model
+
+    auto session = saved_model_bundle->session.get();
     status = session->Run(inputs, output_names, {}, &outputs);
 
     if (status != tensorflow::Status::OK()) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s",
-                            status.error_message().c_str());
+        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s", status.error_message().c_str());
         ThrowException(env, kIllegalArgumentException, "Internal error: Unable to run model.");
-        return nullptr;
+        return;
     }
 
-    // Get Output
+    // Get Outputs
 
-    tensorflow::Tensor output = outputs[0];
-    tensorflow::Tensor *outputPtr = new tensorflow::Tensor(output);
-
-    // Return Java Tensor
-
-    jobject dtype = DataType(env, "FLOAT32");
-    jstring name = env->NewStringUTF("output");
-
-    jintArray shape = env->NewIntArray(1);
-    jint anint[1];
-    anint[0] = 1;
-    env->SetIntArrayRegion(shape, 0, 1, anint);
-
-    jclass tensorClass = env->FindClass("ai/doc/tensorflow/Tensor");
-    jmethodID constructorId = env->GetMethodID(tensorClass, "<init>",
-                                               "(Lai/doc/tensorflow/DataType;[ILjava/lang/String;J)V");
-    jobject tensorObject = env->NewObject(tensorClass, constructorId, dtype, shape, name,
-                                          reinterpret_cast<jlong>(outputPtr));
-
-    return tensorObject;
+    auto output = outputs[0];
+    auto outputPtr = new tensorflow::Tensor(output); // TODO: Avoid copying?
+    setHandle<tensorflow::Tensor>(env, outputTensor, outputPtr);
 }
+
+// Reference Code
+
+// Creating, Writing to, and Reading From a TensorFlow Tensor
+
+//tensorflow::Tensor CreateTensor(float value) {
+//    std::vector<tensorflow::int64> dims;
+//    dims.push_back(1);
+//
+//    tensorflow::gtl::ArraySlice<tensorflow::int64> dim_sizes(dims);
+//    tensorflow::TensorShape shape = tensorflow::TensorShape(dim_sizes);
+//    tensorflow::Tensor tensor(tensorflow::DT_FLOAT, shape);
+//
+//    auto flat_tensor = tensor.flat<float_t>();
+//    auto buffer = flat_tensor.data();
+//
+//    buffer[0] = value;
+//
+//    return tensor;
+//}
+//
+//float ReadTensor(tensorflow::Tensor tensor) {
+//    auto flat_tensor = tensor.flat<float_t>();
+//    auto buffer = flat_tensor.data();
+//    float val = buffer[0];
+//
+//    return val;
+//}
+
+// Create a Java Tensor
+
+//    jobject dtype = DataType(env, "FLOAT32");
+//    jstring name = env->NewStringUTF("output");
+//
+//    jintArray shape = env->NewIntArray(1);
+//    jint anint[1];
+//    anint[0] = 1;
+//    env->SetIntArrayRegion(shape, 0, 1, anint);
+//
+//    jclass tensorClass = env->FindClass("ai/doc/tensorflow/Tensor");
+//    jmethodID constructorId = env->GetMethodID(tensorClass, "<init>","(Lai/doc/tensorflow/DataType;[ILjava/lang/String;)V");
+//    jobject tensorObject = env->NewObject(tensorClass, constructorId, dtype, shape, name);

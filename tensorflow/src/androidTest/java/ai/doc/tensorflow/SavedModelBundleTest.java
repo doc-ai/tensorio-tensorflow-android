@@ -65,13 +65,20 @@ public class SavedModelBundleTest {
     @Test
     public void test1In1OutNumberModel() {
         try {
-            File file = bundleForFile("1_in_1_out_number_test.tiobundle");
-            assertNotNull(file);
+            File tioBundle = bundleForFile("1_in_1_out_number_test.tiobundle");
+            assertNotNull(tioBundle);
 
-            SavedModelBundle model = new SavedModelBundle(file);
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir);
             assertNotNull(model);
 
-            model.run();
+            Tensor inputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
+            inputTensor.setFloatValue(2);
+
+            Tensor outputTensor = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
+
+            model.run(inputTensor, outputTensor);
 
         } catch (IOException e) {
             e.printStackTrace();

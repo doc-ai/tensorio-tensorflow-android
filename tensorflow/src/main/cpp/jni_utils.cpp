@@ -7,6 +7,19 @@
 #include <cstdarg>
 #include <cstdlib>
 
+// Conversion Utilities
+
+std::string jstring2string(JNIEnv *env, jstring javaString) {
+    const char *chars = env->GetStringUTFChars(javaString, nullptr);
+    std::string cppString = chars;
+
+    env->ReleaseStringUTFChars(javaString, chars);
+
+    return cppString;
+}
+
+// Exceptions
+
 const char kIllegalArgumentException[] = "java/lang/IllegalArgumentException";
 
 void ThrowException(JNIEnv* env, const char* clazz, const char* fmt, ...) {
