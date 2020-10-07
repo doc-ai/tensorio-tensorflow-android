@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.FileSystemException;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +67,9 @@ public class SavedModelBundleTest {
     @Test
     public void test1In1OutNumberModel() {
         try {
+
+            // Prepare Model
+
             File tioBundle = bundleForFile("1_in_1_out_number_test.tiobundle");
             assertNotNull(tioBundle);
 
@@ -73,15 +78,34 @@ public class SavedModelBundleTest {
             SavedModelBundle model = new SavedModelBundle(modelDir);
             assertNotNull(model);
 
+            // Prepare Inputs
+
             Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-            input.setFloatValue(2);
+
+            ByteBuffer buffer = ByteBuffer.allocateDirect(1 * 4); // dims x bytes for dtype
+
+            buffer.order(ByteOrder.nativeOrder());
+            buffer.putFloat(2);
+
+            input.setBytes(buffer);
+
+            // Prepare Outputs
 
             Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
+
+            // Run Model
 
             Tensor[] inputs = {input};
             Tensor[] outputs = {output};
 
             model.run(inputs, outputs);
+
+            // Read Output
+
+            ByteBuffer out = output.getBytes();
+            float value = out.getFloat();
+
+            assertEquals(value, 25.0, 0.01);
 
         } catch (IOException e) {
             e.printStackTrace();

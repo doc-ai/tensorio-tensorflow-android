@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import ai.doc.tensorflow.AndroidAssets;
 import ai.doc.tensorflow.DataType;
@@ -63,7 +65,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onRunModel(View view) {
         Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-        input.setFloatValue(2);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(1 * 4); // dims x bytes for dtype
+
+        buffer.order(ByteOrder.nativeOrder());
+        buffer.putFloat(2);
+
+        input.setBytes(buffer);
 
         Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
 
@@ -71,7 +78,11 @@ public class MainActivity extends AppCompatActivity {
         Tensor[] outputs = {output};
 
         this.savedModelBundle.run(inputs, outputs);
-        tv.setText(String.valueOf(output.getFloatValue()));
+
+        ByteBuffer out = output.getBytes();
+        float value = out.getFloat();
+
+        tv.setText(String.valueOf(value));
     }
 
     public void onUnloadModel(View view) {

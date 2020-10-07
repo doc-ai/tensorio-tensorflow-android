@@ -6,6 +6,9 @@
 
 package ai.doc.tensorflow;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /**
  * A Tensor is backed by an underlying TensorFlow Tensor that is either prepared in advance of
  * sending it into a model or read as an output from the model. The Java object encapsulates
@@ -44,21 +47,49 @@ public class Tensor implements AutoCloseable {
         return shape;
     }
 
+    /** Returns the total number of elements in the tensor according to dims */
+
+    public long count() {
+        int count = 1;
+        for(int v : getShape()) {
+            count *= v;
+        }
+        return count;
+    }
+
+    /** Returns the byte size of the tensor, which is the number of elements x sizeof(dtype) */
+
+    public long size() {
+        return count() * dtype.byteSize();
+    }
+
     /** Returns the name of the Tensor */
 
     public String getName() {
         return name;
     }
 
-    /** TESTING */
+    /**
+     * Set this tensor's bytes. You must use a directly allocated ByteBuffer, created with
+     * `ByteBuffer.allocateDirect()` and use native ordering for the buffer, set with
+     * `buffer.order(ByteOrder.nativeOrder())`. The buffer should be filled with values of the type
+     * you specified when you created this tensor.
+     */
 
-    public void setFloatValue(float value) {
+    public void setBytes(ByteBuffer buffer) {
+        assert (buffer.isDirect() && buffer.order() == ByteOrder.nativeOrder());
         createBackingTensor();
-        writeFloat(value);
+        writeBytes(buffer, size());
     }
 
-    public float getFloatValue() {
-        return readFloat();
+    /**
+     * Get this tensor's bytes. If you set the tensor's bytes yourself it will return those values,
+     * otherwise it returns the bytes read from a model's outputs in the tensor with the name you
+     * have specified.
+     */
+
+    public ByteBuffer getBytes() {
+        return readBytes(size()).order(ByteOrder.nativeOrder());
     }
 
     // Private Variables
@@ -103,9 +134,11 @@ public class Tensor implements AutoCloseable {
 
     private native void delete();
 
-    /** TESTING */
+    /** Writes bytes to the backing tensor */
 
-    private native void writeFloat(float value);
-    private native float readFloat();
+    private native void writeBytes(ByteBuffer buffer, long size);
 
+    /** Reads bytes from the backing tensor */
+
+    private native ByteBuffer readBytes(long size);
 }
