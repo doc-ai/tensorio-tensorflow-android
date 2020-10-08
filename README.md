@@ -11,43 +11,7 @@ You can do this in Preferences: Appearance and Behavoir > System Settings > Andr
 
 ## Installation
 
-The binary libs used by this project are not included in the GitHub repo. Libraries for three architectures are available. Download all of them from:
-
-```
-gs://tensorio-build/android/release/2.0/ndk/19.2.5345600/api/22/arch/
-  arm64-v8a/
-    libnsync.a
-    libprotobuf.so
-    libtensorflow-core.a
-  x86/
-    libnsync.a
-    libprotobuf.so
-    libtensorflow-core.a
-  x86_64/
-    libnsync.a
-    libprotobuf.so
-    libtensorflow-core.a
-```
-
-And place them in the *distribution/tensorflow/lib/* directory. The directory should look like this when you are finished:
-
-```
-distribution/tensorflow/lib/
-├── arm64-v8a
-│   ├── libnsync.a
-│   ├── libprotobuf.so
-│   └── libtensorflow-core.a
-├── x86
-│   ├── libnsync.a
-│   ├── libprotobuf.so
-│   └── libtensorflow-core.a
-└── x86_64
-    ├── libnsync.a
-    ├── libprotobuf.so
-    └── libtensorflow-core.a
-```
-
-You may need to create the *lib* directory inside *distribution/tensorflow/* yourself.
+If you are downloading this repository over git, a number of large binary files are included with it. You must install [Git Large File Storage](https://git-lfs.github.com) first and configure it.
 
 ## Running the App
 
