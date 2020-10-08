@@ -62,8 +62,31 @@ public class SavedModelBundleTest {
         }
     }
 
+    /** Create a direct native order byte buffer with floats **/
+
+    private ByteBuffer byteBufferWithFloats(float[] floats) {
+        int size = floats.length * 4; // dims x bytes for dtype
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
+        buffer.order(ByteOrder.nativeOrder());
+
+        for (float f : floats) {
+            buffer.putFloat(f);
+        }
+
+        return buffer;
+    }
+
+    /** Compares the contents of a float byte buffer to floats */
+
+    private void assertByteBufferEqualToFloats(ByteBuffer buffer, float epsilon, float[] floats) {
+        for (float f : floats) {
+            assertEquals(buffer.getFloat(), f, epsilon);
+        }
+    }
+
     @Test
-    public void test1In1OutNumberModel() {
+    public void test1x1NumberModel() {
         try {
 
             // Prepare Model
@@ -79,12 +102,7 @@ public class SavedModelBundleTest {
             // Prepare Inputs
 
             Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-
-            ByteBuffer buffer = ByteBuffer.allocateDirect(1 * 4); // dims x bytes for dtype
-
-            buffer.order(ByteOrder.nativeOrder());
-            buffer.putFloat(2);
-
+            ByteBuffer buffer = byteBufferWithFloats(new float[]{2});
             input.setBytes(buffer);
 
             // Prepare Outputs
@@ -101,9 +119,166 @@ public class SavedModelBundleTest {
             // Read Output
 
             ByteBuffer out = output.getBytes();
-            float value = out.getFloat();
+            assertEquals(out.getFloat(), 25, epsilon);
 
-            assertEquals(value, 25.0, 0.01);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void test1x1VectorsModel() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("1_in_1_out_vectors_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input");
+            input.setBytes(byteBufferWithFloats(new float[] {
+                    1, 2, 3, 4
+            }));
+
+            // Prepare Outputs
+
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1,4}, "output");
+
+            // Run Model
+
+            Tensor[] inputs = {input};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            assertByteBufferEqualToFloats(output.getBytes(), epsilon, new float[] {
+                    2, 2, 4, 4
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void test2x2VectorsModel() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("2_in_2_out_vectors_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input1");
+            input1.setBytes(byteBufferWithFloats(new float[] {
+                    1, 2, 3, 4
+            }));
+
+            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input2");
+            input2.setBytes(byteBufferWithFloats(new float[] {
+                    10, 20, 30, 40
+            }));
+
+            // Prepare Outputs
+
+            Tensor output1 = new Tensor(DataType.FLOAT32, new int[]{1,1}, "output1");
+            Tensor output2 = new Tensor(DataType.FLOAT32, new int[]{1,1}, "output2");
+
+            // Run Model
+
+            Tensor[] inputs = {input1, input2};
+            Tensor[] outputs = {output1, output2};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            ByteBuffer out1 = output1.getBytes();
+            assertEquals(out1.getFloat(), 240, epsilon);
+
+            ByteBuffer out2 = output2.getBytes();
+            assertEquals(out2.getFloat(), 64, epsilon);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void test2x2MatricesModel() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("2_in_2_out_matrices_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input1");
+            input1.setBytes(byteBufferWithFloats(new float[]{
+                    1,    2,    3,    4,
+                    10,   20,   30,   40,
+                    100,  200,  300,  400,
+                    1000, 2000, 3000, 4000
+            }));
+
+            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input2");
+            input2.setBytes(byteBufferWithFloats(new float[] {
+                    5,    6,    7,    8,
+                    50,   60,   70,   80,
+                    500,  600,  700,  800,
+                    5000, 6000, 7000, 8000
+            }));
+
+            // Prepare Outputs
+
+            Tensor output1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "output1");
+            Tensor output2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "output2");
+
+            // Run Model
+
+            Tensor[] inputs = {input1, input2};
+            Tensor[] outputs = {output1, output2};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            assertByteBufferEqualToFloats(output1.getBytes(), epsilon, new float[] {
+                    56,       72,       56,       72,
+                    5600,     7200,     5600,     7200,
+                    560000,   720000,   560000,   720000,
+                    56000000, 72000000, 56000000, 72000000,
+            });
+
+            assertByteBufferEqualToFloats(output2.getBytes(), epsilon, new float[] {
+                    18,    18,    18,    18,
+                    180,   180,   180,   180,
+                    1800,  1800,  1800,  1800,
+                    18000, 18000, 18000, 18000
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
