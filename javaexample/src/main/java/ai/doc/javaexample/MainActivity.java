@@ -19,10 +19,8 @@ import ai.doc.tensorflow.Tensor;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-
-    private TextView tv;
-
     private SavedModelBundle savedModelBundle;
+    private TextView tv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -11,6 +11,8 @@ GIT_LFS="./git-lfs"
 
 NDK_VERSION=19.2.5345600
 
+NDK_19_URL=https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+
 echo "Downloading and untarring git-lfs binary"
 wget -qO- $GIT_LFS_LINK | tar xvz git-lfs
 
