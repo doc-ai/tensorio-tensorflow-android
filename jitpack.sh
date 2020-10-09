@@ -10,7 +10,6 @@ GIT_LFS_LINK=https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VER
 GIT_LFS="./git-lfs"
 
 NDK_VERSION=19.2.5345600
-
 NDK_19_URL=https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
 
 echo "Downloading and untarring git-lfs binary"
@@ -20,10 +19,10 @@ echo "Fetching LFS files."
 $GIT_LFS install
 $GIT_LFS pull --include distribution/lib
 
-# echo "Installing NDK ${NDK_VERSION}"
+echo "Installing NDK ${NDK_VERSION}"
 # touch /opt/android-sdk-linux/.android/repositories.cfg
 # sdkmanager --install "ndk;${NDK_VERSION}"
-$ANDROID_HOME/tools/bin/sdkmanager --install "ndk;${NDK_VERSION}"
+yes | $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;${NDK_VERSION}"
 
-# ANDROID_NDK_HOME
-# NDK_HOME
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}
+export NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}
