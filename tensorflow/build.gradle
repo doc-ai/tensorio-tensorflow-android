@@ -4,13 +4,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 android {
     compileSdkVersion 29
     buildToolsVersion "30.0.1"
-    ndkVersion "19.2.5345600"
+    ndkVersion "21.1.6352462"
 
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 1
-        versionName "0.1.1"
+        versionCode 3
+        versionName "0.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
