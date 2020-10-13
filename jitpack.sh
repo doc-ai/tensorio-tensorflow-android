@@ -14,10 +14,11 @@ GIT_LFS_LINK=https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VER
 # NDK_19_URL=https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
 
 echo "Downloading and untarring git-lfs binary"
-wget -qO- $GIT_LFS_LINK | tar xv
+wget -qO- $GIT_LFS_LINK | tar zxvf git-lfs
 
 echo "Installing git-lfs"
-./install.sh
+PATH+=:$(pwd)
+git lfs install
 
 echo "Fetching LFS files."
 git lfs pull --include distribution/lib
