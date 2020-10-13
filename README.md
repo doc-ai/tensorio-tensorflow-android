@@ -4,7 +4,7 @@
 
 Ensure the following have been installed in Android Studio:
 
-- Android NDK 19.2.5345600
+- Android NDK 21.1.6352462
 - Android Cmake 3.10.2
 
 You can do this in Preferences: Appearance and Behavoir > System Settings > Android SDK > SDK Tools. Click on Show Package Contents at the bottom right and expand the NDK and CMake options to select the appropriate packages.
