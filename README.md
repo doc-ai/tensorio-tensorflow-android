@@ -1,5 +1,7 @@
 # Tensor/IO TensorFlow Android
 
+This library vends a full build of TensorFlow 2.0 for Android in a Java wrapper. Refer to the [r2.0.doc.ai-android](https://github.com/doc-ai/tensorflow/tree/r2.0.doc.ai-android) branch of our TensorFlow fork and specifically the [Android Build Readme](https://github.com/doc-ai/tensorflow/blob/r2.0.doc.ai-android/tensorflow/contrib/makefile/README_ANDROID_DOCAI.md) for more info.
+
 ## Requirements:
 
 Ensure the following have been installed in Android Studio:
@@ -13,19 +15,47 @@ Additionally the library has a minSdk requirement of API 22.
 
 ## Installation
 
-If you are downloading this repository over git, a number of large binary files are included with it. You must install [Git Large File Storage](https://git-lfs.github.com) first and configure it.
+If you are downloading this repository over git, a number of large binary files are included with it. You must install [Git Large File Storage](https://git-lfs.github.com) first and configure it. You can also find the location of the latest copies of the binaries in the jitpack.sh script.
 
 ## Running the Example Application
 
-After you have done this, simply open the project folder in Android Studio, let gradle and all that jazz do its job, select the app configuration, which is probably selected by default, select an x86 or x86_64 emulator or an Android device, and press play.
+Open the project folder in Android Studio, let gradle and all that jazz do its job, select the app configuration, which is probably selected by default, select an x86 or x86_64 emulator or an Android device, and press play.
 
 ## Using the Library
 
-Until we have jitpack support you must build the Android library on your machine to produce an AAR file, then from the project that will use this library import that file. We are following these instructions:
+### Jitpack
+
+The simplest way to use this library is to import it into your project as a gradle dependency via jitpack. For detailed instructions see https://jitpack.io/#doc-ai/tensorio-tensorflow-android/0.2.2
+
+Add the following to your project gradle file:
+
+```groovy
+allprojects {
+  repositories {
+    maven { url 'https://jitpack.io' }
+    ...
+  }
+}
+```
+
+Then add the dependency to your module's gradle file:
+
+```groovy
+dependencies {
+  implementation 'com.github.doc-ai:tensorio-tensorflow-android:0.2.2'
+  ...
+}
+```
+
+And resync your gradle file.
+
+### Building the AAR
+
+If you'd prefer not to use Jitpack you can build the AAR yourself and import it directly into a project. We are following these instructions:
 
 https://developer.android.com/studio/projects/android-library
 
-First, open up the main project and build and run the app. This will prouduce the following two files:
+After cloning the repo open up the main project and build and run the app. This will prouduce the following two files. You may need to set your Build Variants appropriately.
 
 ```
 tensorflow/build/outputs/aar/tensorflow-release.aar
@@ -67,3 +97,7 @@ packagingOptions {
     pickFirst 'lib/x86_64/libc++_shared.so'
 }
 ```
+
+## Running a Model
+
+Additional instructions forthcoming. In the meantime see the included tests.
