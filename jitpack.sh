@@ -5,28 +5,66 @@
 # This script's purpose is for use with jitpack.io - a repository to publish snapshot automatically
 # This script downloads git-lfs and pull needed sources to build GATK in the jitpack environment
 
-GIT_LFS_VERSION="2.12.0"
-GIT_LFS_LINK=https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz
+# git lfs: doesn't seem to work
 
-# https://github.com/git-lfs/git-lfs/releases/download/v2.12.0/git-lfs-linux-amd64-v2.12.0.tar.gz
+# GIT_LFS_VERSION="2.12.0"
+# GIT_LFS_LINK=https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz
+#            # https://github.com/git-lfs/git-lfs/releases/download/v2.12.0/git-lfs-linux-amd64-v2.12.0.tar.gz
 
-# NDK_VERSION=19.2.5345600
-# NDK_19_URL=https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+# echo "Downloading and untarring git-lfs binary"
+# wget -qO- $GIT_LFS_LINK | tar xvz git-lfs
 
-echo "Downloading and untarring git-lfs binary"
-wget -qO- $GIT_LFS_LINK | tar xvz git-lfs
+# echo "Installing git-lfs"
+# PATH+=:$(pwd)
+# git lfs install
 
-echo "Installing git-lfs"
-PATH+=:$(pwd)
-git lfs install
+# echo "Fetching LFS files."
+# git lfs pull --include distribution/lib
 
-echo "Fetching LFS files."
-git lfs pull --include distribution/lib
+# wget
 
-# echo "Installing NDK ${NDK_VERSION}"
-# touch /opt/android-sdk-linux/.android/repositories.cfg
-# sdkmanager --install "ndk;${NDK_VERSION}"
-# yes | $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;${NDK_VERSION}"
+echo "Downloading libs into distribution directory"
 
-# export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}
-# export NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}
+RELEASE=2.0
+NDK=21.1.6352462
+API=22
+
+ARCH_ARM64=arm64-v8a
+ARCH_X86_64=x86_64
+ARCH_X86=x86
+
+LIB_NSYNC=libnsync.a
+LIB_PROTO=libprotobuf.so
+LIB_TENSORFLOW=libtensorflow-core.a
+
+LIB_DIR=distribution/tensorflow/lib
+
+ARM64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_ARM64}/${LIB_NSYNC}
+ARM64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_ARM64}/${LIB_PROTO}
+ARM64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_ARM64}/${LIB_TENSORFLOW}
+
+X86_64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_X86_64}/${LIB_NSYNC}
+X86_64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_X86_64}/${LIB_PROTO}
+X86_64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_X86_64}/${LIB_TENSORFLOW}
+
+X86_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/2.0/ndk/${NDK}/api/${API}/arch/${ARCH_X86}/${LIB_NSYNC}
+X86_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/2.0/ndk/${NDK}/api/${API}/arch/${ARCH_X86}/${LIB_PROTO}
+X86_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/2.0/ndk/${NDK}/api/${API}/arch/${ARCH_X86}/${LIB_TENSORFLOW}
+
+echo "Downloading arm64 libs"
+
+wget ${ARM64_LIB_NSYNC_URL} -O ${LIB_DIR}/${ARCH_ARM64}/${LIB_NSYNC}
+wget ${ARM64_LIB_PROTO_URL} -O ${LIB_DIR}/${ARCH_ARM64}/${LIB_PROTO}
+wget ${ARM64_LIB_TENSORFLOW_URL} -O ${LIB_DIR}/${ARCH_ARM64}/${LIB_TENSORFLOW}
+
+echo "Downloading x86_64 libs"
+
+wget ${X86_64_LIB_NSYNC_URL} -O ${LIB_DIR}/${ARCH_X86_64}/${LIB_NSYNC}
+wget ${X86_64_LIB_PROTO_URL} -O ${LIB_DIR}/${ARCH_X86_64}/${LIB_PROTO}
+wget ${X86_64_LIB_TENSORFLOW_URL} -O ${LIB_DIR}/${ARCH_X86_64}/${LIB_TENSORFLOW}
+
+echo "Downloading x86 libs"
+
+wget ${X86_LIB_NSYNC_URL} -O ${LIB_DIR}/${ARCH_X86}/${LIB_NSYNC}
+wget ${X86_LIB_PROTO_URL} -O ${LIB_DIR}/${ARCH_X86}/${LIB_PROTO}
+wget ${X86_LIB_TENSORFLOW_URL} -O ${LIB_DIR}/${ARCH_X86}/${LIB_TENSORFLOW}
