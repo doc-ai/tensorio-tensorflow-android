@@ -1,7 +1,7 @@
 
 /*
  * AndroidAssets.java
- * TensorIO
+ * TensorIO TensorFlow
  *
  * Created by Philip Dow on 7/6/2020
  * Copyright (c) 2020 - Present doc.ai (http://doc.ai)
