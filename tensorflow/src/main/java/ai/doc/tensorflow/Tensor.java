@@ -112,6 +112,7 @@ public class Tensor implements AutoCloseable {
     private void createBackingTensor() {
         if (!isBacked) {
             create(dtype.c(), shape);
+            isBacked = true;
         }
     }
 
