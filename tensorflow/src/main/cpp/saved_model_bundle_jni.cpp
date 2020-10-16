@@ -40,13 +40,24 @@ jobject DataType(JNIEnv *env, const char* name) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_ai_doc_tensorflow_SavedModelBundle_create(JNIEnv *env, jobject thiz, jstring dir) {
+Java_ai_doc_tensorflow_SavedModelBundle_create(JNIEnv *env, jobject thiz, jstring dir, jstring mode) {
     auto saved_model_bundle = new tensorflow::SavedModelBundle();
     auto sDir = jstring2string(env, dir);
 
     // TensorFlow: Load Model
 
-    std::unordered_set<std::string> tags = {tensorflow::kSavedModelTagServe};
+    auto modeString = jstring2string(env, mode);
+    std::unordered_set<std::string> tags;
+
+    if (modeString == "serve") {
+        tags = {tensorflow::kSavedModelTagServe};
+    }  else if (modeString == "train") {
+        tags = {tensorflow::kSavedModelTagTrain};
+    } else {
+        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "Mode must be one of 'serve' or 'train'");
+        ThrowException(env, kIllegalArgumentException,"Internal error: Bad mode provided.");
+        return;
+    }
 
     tensorflow::SessionOptions session_opts;
     tensorflow::RunOptions run_opts;
@@ -117,6 +128,85 @@ Java_ai_doc_tensorflow_SavedModelBundle_run(JNIEnv *env, jobject thiz, jobjectAr
         __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s", status.error_message().c_str());
         ThrowException(env, kIllegalArgumentException, "Internal error: Unable to run model.");
         return;
+    }
+
+    // Get Outputs
+
+    assert(outputCount == outputs.size());
+
+    for (jsize i = 0; i < outputs.size(); i++) {
+        jobject outputTensor = env->GetObjectArrayElement(outputTensors, i);
+        auto output = outputs[i]; // TODO: Avoid copying?
+        auto outputPtr = new tensorflow::Tensor(output);
+        setHandle<tensorflow::Tensor>(env, outputTensor, outputPtr);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_ai_doc_tensorflow_SavedModelBundle_train(JNIEnv *env, jobject thiz, jobjectArray inputTensors,
+                                              jobjectArray outputTensors, jobjectArray trainingOpNames) {
+    auto saved_model_bundle = getHandle<tensorflow::SavedModelBundle>(env, thiz);
+    tensorflow::Status status;
+
+    // Prepare Inputs
+    // Inputs are pairs of names and tensors
+
+    std::vector<std::pair<std::string, tensorflow::Tensor>> inputs;
+    jsize inputCount = env->GetArrayLength(inputTensors);
+
+    for (jsize i = 0; i < inputCount; i++) {
+        jobject inputTensor = env->GetObjectArrayElement(inputTensors, i);
+        auto input_tensor = *getHandle<tensorflow::Tensor>(env, inputTensor);
+        auto input_name = jstring2string(env, GetTensorName(env, inputTensor));
+        auto input = std::pair<std::string, tensorflow::Tensor>(input_name, input_tensor);
+        inputs.push_back(input);
+    }
+
+    // Prepare Outputs
+    // We request outputs by name only but also provide a vector to capture them
+
+    std::vector<std::string> output_names;
+    jsize outputCount = env->GetArrayLength(outputTensors);
+
+    for (jsize i = 0; i < outputCount; i++) {
+        jobject outputTensor = env->GetObjectArrayElement(outputTensors, i);
+        auto output_name = jstring2string(env, GetTensorName(env, outputTensor));
+        output_names.push_back(output_name);
+    }
+
+    std::vector<tensorflow::Tensor> outputs;
+
+    // Prepare Training Ops
+    // Training ops are just the graph ops by name to run for the training step
+
+    std::vector<std::string> training_names;
+    jsize trainingCount = env->GetArrayLength(trainingOpNames);
+
+    for (jsize i = 0; i < trainingCount; i++) {
+        jstring opName = (jstring) env->GetObjectArrayElement(trainingOpNames, i);
+        auto training_name = jstring2string(env, opName);
+        training_names.push_back(training_name);
+    }
+
+    // Run Training Step
+
+    auto session = saved_model_bundle->session.get();
+
+    status = session->Run(inputs, {}, training_names, nullptr);
+
+    if ( status != tensorflow::Status::OK() ) {
+        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s", status.error_message().c_str());
+        ThrowException(env, kIllegalArgumentException, "Internal error: Train: Unable to run training step.");
+    }
+
+    // Run Output Step (usually loss)
+
+    status = session->Run(inputs, output_names, {}, &outputs);
+
+    if ( status != tensorflow::Status::OK() ) {
+        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s", status.error_message().c_str());
+        ThrowException(env, kIllegalArgumentException, "Internal error: Train: Unable to run output step.");
     }
 
     // Get Outputs

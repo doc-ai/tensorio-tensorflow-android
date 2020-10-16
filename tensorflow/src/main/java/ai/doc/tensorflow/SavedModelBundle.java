@@ -26,6 +26,21 @@ import java.io.File;
 
 public class SavedModelBundle implements AutoCloseable {
 
+    public enum Mode {
+        Serve("serve"),
+        Train("train");
+
+        private final String value;
+
+        Mode(String value) {
+            this.value = value;
+        }
+
+        String c() {
+            return value;
+        }
+    }
+
     static {
         NativeLibrary.init();
     }
@@ -39,8 +54,8 @@ public class SavedModelBundle implements AutoCloseable {
 
     /** Instantiates a model in the Saved Model format with a directory at the file path */
 
-    public SavedModelBundle(File file) {
-        create(file.getPath());
+    public SavedModelBundle(File file, Mode mode) {
+        create(file.getPath(), mode.c());
     }
 
     // Java Native Interface
@@ -51,14 +66,18 @@ public class SavedModelBundle implements AutoCloseable {
 
     /** Loads a model at a file path and backs this instance with a SavedModelBundle */
 
-    private native void create(String dir);
+    private native void create(String dir, String mode);
 
     /** Unloads the model and frees the memory associated with it */
 
     private native void delete();
 
-    /** Runs the model with input and output tensors **/
+    /** Runs the model with input and output tensors */
 
     public native void run(Tensor[] inputs, Tensor[] outputs);
+
+    /** Runs a single epoch of training with the input and output tensors and the names of the training ops */
+
+    public native void train(Tensor[] inputs, Tensor[] outputs, String[] trainingOps);
 
 }

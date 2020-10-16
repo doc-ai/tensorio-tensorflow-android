@@ -37,6 +37,8 @@ import ai.doc.tensorflow.DataType;
 import ai.doc.tensorflow.SavedModelBundle;
 import ai.doc.tensorflow.Tensor;
 
+import static ai.doc.tensorflow.SavedModelBundle.Mode;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private SavedModelBundle savedModelBundle;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             File tioBundle = bundleForFile("1_in_1_out_number_test.tiobundle");
             File modelDir = new File(tioBundle, "predict");
 
-            this.savedModelBundle = new SavedModelBundle(modelDir);
+            this.savedModelBundle = new SavedModelBundle(modelDir, Mode.Serve);
             tv.setText("Model is loaded");
         } catch (IOException e) {
             Log.v(TAG, "Exception: bundleForFile");

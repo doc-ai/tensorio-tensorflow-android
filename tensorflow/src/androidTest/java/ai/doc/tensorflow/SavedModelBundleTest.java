@@ -21,7 +21,10 @@
 package ai.doc.tensorflow;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
@@ -30,9 +33,12 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.FileSystemException;
+
+import static ai.doc.tensorflow.SavedModelBundle.Mode;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +47,44 @@ public class SavedModelBundleTest {
     private Context testContext = InstrumentationRegistry.getInstrumentation().getContext();
 
     private float epsilon = 0.01f;
+
+    /** Borrowed from Tensor/IO to normalize pixels from 4 byte int values to 4 byte float values */
+
+    public abstract static class PixelNormalizer {
+
+        public abstract float normalize(int value, int channel);
+
+        public static PixelNormalizer PixelNormalizerSingleBias(final float scale, final float bias) {
+            return new PixelNormalizer() {
+                @Override
+                public float normalize(int value, int channel) {
+                    return (value * scale) + bias;
+                }
+            };
+        }
+
+        /**
+         * Normalizes pixel values from a range of `[0,255]` to `[0,1]`.
+         * This is equivalent to applying a scaling factor of `1.0/255.0` and no channel bias.
+         */
+
+        public static PixelNormalizer PixelNormalizerZeroToOne(){
+            float scale = 1.0f/255.0f;
+            return PixelNormalizerSingleBias(scale, 0.0f);
+        }
+
+        /**
+         * Normalizes pixel values from a range of `[0,255]` to `[-1,1]`.
+         * This is equivalent to applying a scaling factor of `2.0/255.0` and a bias of `-1` to each channel.
+         */
+
+        public static PixelNormalizer PixelNormalizerNegativeOneToOne(){
+            float scale = 2.0f/255.0f;
+            float bias = -1f;
+            return PixelNormalizerSingleBias(scale, bias);
+        }
+    }
+
 
     /** Set up a models directory to copy assets to for testing */
 
@@ -82,10 +126,10 @@ public class SavedModelBundleTest {
         }
     }
 
-    /** Create a direct native order byte buffer with floats **/
+    /** Create a direct native order byte buffer with floats */
 
     private ByteBuffer byteBufferWithFloats(float[] floats) {
-        int size = floats.length * 4; // dims x bytes for dtype
+        int size = floats.length * 4; // dims * bytes_per_float
 
         ByteBuffer buffer = ByteBuffer.allocateDirect(size);
         buffer.order(ByteOrder.nativeOrder());
@@ -95,6 +139,88 @@ public class SavedModelBundleTest {
         }
 
         return buffer;
+    }
+
+    /** Create a direct native order byte buffer with int32s */
+
+    private ByteBuffer byteBufferWithInts(int[] ints) {
+        int size = ints.length * 4; // dims * bytes_per_int32
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
+        buffer.order(ByteOrder.nativeOrder());
+
+        for (int i : ints) {
+            buffer.putInt(i);
+        }
+
+        return buffer;
+    }
+
+    /** Create a direct native order byte buffer with int64s */
+
+    private ByteBuffer byteBufferWithLongs(long[] longs) {
+        int size = longs.length * 8; // dims * bytes_per_int64
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
+        buffer.order(ByteOrder.nativeOrder());
+
+        for (long l : longs) {
+            buffer.putLong(l);
+        }
+
+        return buffer;
+    }
+
+    /** Creates a direct native order byte buffer with a bitmap and normalizes to [0,1] */
+
+    private ByteBuffer byteBufferWithBitmap(Bitmap bitmap) {
+        // width * height * channels * bytes_per_float
+        int size = bitmap.getWidth() * bitmap.getHeight() * 3 * 4;
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
+        buffer.order(ByteOrder.nativeOrder());
+
+        // Read Bitmap into int array
+
+        int[] intValues = new int[bitmap.getWidth() * bitmap.getHeight()]; // 4 bytes per int
+        bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight()); // Returns ARGB pixels
+
+        // Write Individual Pixels to Buffer
+
+        int pixel = 0;
+        for (int y = 0; y < bitmap.getHeight(); y++) {
+            for (int x = 0; x < bitmap.getWidth(); x++) {
+                final int val = intValues[pixel++];
+                writePixelToBuffer(val, buffer, false, PixelNormalizer.PixelNormalizerZeroToOne());
+            }
+        }
+
+        return buffer;
+    }
+
+    /**
+     * Writes a pixel to a buffer, normalizing and converting it as needed.
+     *
+     * Before calling this method the first time in a loop, rewind the buffer. The buffer then
+     * increments its index with every call to put.
+     *
+     * @param pixelValue 4 byte pixel value to write with ARGB or BGRA format wit
+     * @param buffer The buffer to write to
+     * @param quantized true if the buffer expects quantized (byte) data, false otherwise (float)
+     * @param normalizer The normalizer than converts a single byte pixel-channel value to a
+     *                   floating point value
+     */
+
+    private void writePixelToBuffer(int pixelValue, @NonNull ByteBuffer buffer, boolean quantized, @NonNull PixelNormalizer normalizer) {
+        if (quantized) {
+            buffer.put((byte) ((pixelValue >> 16) & 0xFF));
+            buffer.put((byte) ((pixelValue >> 8) & 0xFF));
+            buffer.put((byte) (pixelValue & 0xFF));
+        } else {
+            buffer.putFloat(normalizer.normalize((pixelValue >> 16) & 0xFF, 0));
+            buffer.putFloat(normalizer.normalize((pixelValue >> 8) & 0xFF, 1));
+            buffer.putFloat(normalizer.normalize(pixelValue & 0xFF, 2));
+        }
     }
 
     /** Compares the contents of a float byte buffer to floats */
@@ -116,7 +242,7 @@ public class SavedModelBundleTest {
 
             File modelDir = new File(tioBundle, "predict");
 
-            SavedModelBundle model = new SavedModelBundle(modelDir);
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
             assertNotNull(model);
 
             // Prepare Inputs
@@ -157,7 +283,7 @@ public class SavedModelBundleTest {
 
             File modelDir = new File(tioBundle, "predict");
 
-            SavedModelBundle model = new SavedModelBundle(modelDir);
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
             assertNotNull(model);
 
             // Prepare Inputs
@@ -200,7 +326,7 @@ public class SavedModelBundleTest {
 
             File modelDir = new File(tioBundle, "predict");
 
-            SavedModelBundle model = new SavedModelBundle(modelDir);
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
             assertNotNull(model);
 
             // Prepare Inputs
@@ -251,7 +377,7 @@ public class SavedModelBundleTest {
 
             File modelDir = new File(tioBundle, "predict");
 
-            SavedModelBundle model = new SavedModelBundle(modelDir);
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
             assertNotNull(model);
 
             // Prepare Inputs
@@ -302,6 +428,107 @@ public class SavedModelBundleTest {
 
         } catch (IOException e) {
             e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testCatsVsDogsPredict() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("cats-vs-dogs-predict.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
+            assertNotNull(model);
+
+            // Prepare Input
+
+            InputStream stream = testContext.getAssets().open("cat.jpg");
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image");
+            input.setBytes(byteBufferWithBitmap(bitmap));
+
+            // Prepare output
+
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1,1}, "sigmoid");
+
+            // Run Model
+
+            Tensor[] inputs = {input};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            float sigmoid = output.getBytes().getFloat();
+            assertTrue(sigmoid < 0.5);
+
+        } catch (IOException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testCatsVsDogsTrain() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("cats-vs-dogs-train.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "train");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Train);
+            assertNotNull(model);
+
+            // Prepare Input
+
+            InputStream stream = testContext.getAssets().open("cat.jpg");
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image");
+            input.setBytes(byteBufferWithBitmap(bitmap));
+
+            // Prepare Label
+
+            Tensor labels = new Tensor(DataType.INT32, new int[]{1,1}, "labels");
+            labels.setBytes(byteBufferWithInts(new int[]{
+                    0
+            }));
+
+            // Prepare Output
+
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "sigmoid_cross_entropy_loss/value");
+
+            // Run Training
+
+            String[] trainingOps = {"train"};
+            Tensor[] inputs = {input, labels};
+            Tensor[] outputs = {output};
+
+            float[] losses = new float[4];
+            int epochs = 4;
+
+            for (int epoch = 0; epoch < epochs; epoch++) {
+                model.train(inputs, outputs, trainingOps);
+
+                // Read Output
+
+                float loss = output.getBytes().getFloat();
+                losses[epoch] = loss;;
+            }
+
+            assertNotEquals(losses[0], losses[1]);
+            assertNotEquals(losses[1], losses[2]);
+            assertNotEquals(losses[2], losses[3]);
+
+        } catch (IOException e) {
             fail();
         }
     }
