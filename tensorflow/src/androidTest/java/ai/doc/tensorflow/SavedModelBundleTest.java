@@ -231,6 +231,8 @@ public class SavedModelBundleTest {
         }
     }
 
+    // Single Valued Tests
+
     @Test
     public void test1x1NumberModel() {
         try {
@@ -315,6 +317,8 @@ public class SavedModelBundleTest {
             fail();
         }
     }
+
+    // Multiple Input/Output Tests
 
     @Test
     public void test2x2VectorsModel() {
@@ -431,6 +435,63 @@ public class SavedModelBundleTest {
             fail();
         }
     }
+
+    // Int32 and Int64 Tests
+    // Uses the same graph as the 1_in_1_out_number_test but with int32 data types
+
+    // This graph takes and produces int32s but they are cast to float32s for the internal ops
+    // The current tensorflow build doesn't fully support int32 data types for all ops
+
+    @Test
+    public void testInt32Model() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("int32io_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor input = new Tensor(DataType.INT32, new int[]{1}, "input");
+            ByteBuffer buffer = byteBufferWithInts(new int[]{2});
+            input.setBytes(buffer);
+
+            // Prepare Outputs
+
+            Tensor output = new Tensor(DataType.INT32, new int[]{1}, "output");
+
+            // Run Model
+
+            Tensor[] inputs = {input};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            ByteBuffer out = output.getBytes();
+            assertEquals(out.getInt(), 25);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    // This graph takes and produces int64s but they are cast to float32s for the internal ops
+    // The current tensorflow build doesn't fully support int64s data types for all ops
+
+    @Test
+    public void testInt64Model() {
+        fail();
+    }
+
+    // Real World Tests
 
     @Test
     public void testCatsVsDogsPredict() {
