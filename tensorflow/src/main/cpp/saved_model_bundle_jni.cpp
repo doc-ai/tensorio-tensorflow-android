@@ -32,6 +32,8 @@
 #include "jni_utils.h"
 #include "tensor_jni.h"
 
+// TODO: They aren't all illegal argument exceptions
+
 jobject DataType(JNIEnv *env, const char* name) {
     jclass klass = env->FindClass("ai/doc/tensorflow/DataType");
     jfieldID fieldId = env->GetStaticFieldID(klass, name,"Lai/doc/tensorflow/DataType;");
@@ -184,7 +186,7 @@ Java_ai_doc_tensorflow_SavedModelBundle_train(JNIEnv *env, jobject thiz, jobject
     jsize trainingCount = env->GetArrayLength(trainingOpNames);
 
     for (jsize i = 0; i < trainingCount; i++) {
-        jstring opName = (jstring) env->GetObjectArrayElement(trainingOpNames, i);
+        auto opName = (jstring) env->GetObjectArrayElement(trainingOpNames, i);
         auto training_name = jstring2string(env, opName);
         training_names.push_back(training_name);
     }
@@ -218,6 +220,29 @@ Java_ai_doc_tensorflow_SavedModelBundle_train(JNIEnv *env, jobject thiz, jobject
         auto output = outputs[i]; // TODO: Avoid copying?
         auto outputPtr = new tensorflow::Tensor(output);
         setHandle<tensorflow::Tensor>(env, outputTensor, outputPtr);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_ai_doc_tensorflow_SavedModelBundle_export(JNIEnv *env, jobject thiz, jstring path) {
+    auto saved_model_bundle = getHandle<tensorflow::SavedModelBundle>(env, thiz);
+    auto meta_graph_def = saved_model_bundle->meta_graph_def;
+    auto session = saved_model_bundle->session.get();
+    tensorflow::Status status;
+
+    auto sPath = jstring2string(env, path);
+    sPath += "/checkpoint";
+
+    tensorflow::Tensor checkpoint_tensor(tensorflow::DT_STRING, tensorflow::TensorShape());
+    checkpoint_tensor.scalar<std::string>()() = sPath;
+
+    std::vector<std::pair<std::string, tensorflow::Tensor>> checkpoint_feed_dict = {{meta_graph_def.saver_def().filename_tensor_name(), checkpoint_tensor}};
+    status = session->Run(checkpoint_feed_dict, {}, {meta_graph_def.saver_def().save_tensor_name()}, nullptr);
+
+    if ( status != tensorflow::Status::OK() ) {
+        __android_log_print(ANDROID_LOG_VERBOSE, "Tensor/IO TensorFlow", "%s", status.error_message().c_str());
+        ThrowException(env, kIllegalArgumentException, "Internal error: Export: Unable to export model checkpoint.");
     }
 }
 

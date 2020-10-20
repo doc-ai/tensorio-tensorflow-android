@@ -21,10 +21,18 @@
 package ai.doc.tensorflow;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /** Manages access to an underlying saved model bundle */
 
 public class SavedModelBundle implements AutoCloseable {
+
+    /** The name of the files produced by a model export */
+
+    public static String CheckpointsIndex = "checkpoint.index";
+    public static String CheckpointsData = "checkpoint.data-00000-of-00001";
+
+    /** The model mode: inference (serve) or training (train) */
 
     public enum Mode {
         Serve("serve"),
@@ -58,6 +66,10 @@ public class SavedModelBundle implements AutoCloseable {
         create(file.getPath(), mode.c());
     }
 
+    public void export(File file) {
+        export(file.getPath());
+    }
+
     // Java Native Interface
 
     /** The pointer to the underlying SavedModelBundle */
@@ -79,5 +91,9 @@ public class SavedModelBundle implements AutoCloseable {
     /** Runs a single epoch of training with the input and output tensors and the names of the training ops */
 
     public native void train(Tensor[] inputs, Tensor[] outputs, String[] trainingOps);
+
+    /** Exports the model checkpoints to the file path */
+
+    private native void export(String path);
 
 }

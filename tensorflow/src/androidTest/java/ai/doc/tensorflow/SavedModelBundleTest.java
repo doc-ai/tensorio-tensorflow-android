@@ -94,6 +94,11 @@ public class SavedModelBundleTest {
         if (!f.mkdirs()) {
             throw new FileSystemException("on create: " + f.getPath());
         }
+
+        File e = new File(testContext.getFilesDir(), "exports");
+        if (!e.mkdirs()) {
+            throw new FileSystemException("on create: " + f.getPath());
+        }
     }
 
     /** Tear down the models directory */
@@ -102,6 +107,9 @@ public class SavedModelBundleTest {
     public void tearDown() throws Exception {
         File f = new File(testContext.getFilesDir(), "models");
         deleteRecursive(f);
+
+        File e = new File(testContext.getFilesDir(), "exports");
+        deleteRecursive(e);
     }
 
     /** Create a model bundle from a file, copying the asset to models */
@@ -111,6 +119,19 @@ public class SavedModelBundleTest {
         File file = new File(dir, filename);
 
         AndroidAssets.copyAsset(testContext, filename, file);
+        return file;
+    }
+
+    /** Creates an export directory with name */
+
+    private File exportForFile(String filename) throws IOException {
+        File dir = new File(testContext.getFilesDir(), "exports");
+        File file = new File(dir, filename);
+
+        if (!file.mkdirs()) {
+            throw new FileSystemException("on create: " + file.getPath());
+        }
+
         return file;
     }
 
@@ -593,4 +614,63 @@ public class SavedModelBundleTest {
             fail();
         }
     }
+
+    @Test
+    public void textExportModel() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("cats-vs-dogs-train.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "train");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Train);
+            assertNotNull(model);
+
+            // Prepare Input
+
+            InputStream stream = testContext.getAssets().open("cat.jpg");
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1, 128, 128, 3}, "image");
+            input.setBytes(byteBufferWithBitmap(bitmap));
+
+            // Prepare Label
+
+            Tensor labels = new Tensor(DataType.INT32, new int[]{1, 1}, "labels");
+            labels.setBytes(byteBufferWithInts(new int[]{
+                    0
+            }));
+
+            // Prepare Output
+
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "sigmoid_cross_entropy_loss/value");
+
+            // Run Training
+
+            String[] trainingOps = {"train"};
+            Tensor[] inputs = {input, labels};
+            Tensor[] outputs = {output};
+
+            int epochs = 4;
+            for (int epoch = 0; epoch < epochs; epoch++) {
+                model.train(inputs, outputs, trainingOps);
+
+            }
+
+            File exportDir = exportForFile("cats-vs-dogs");
+            model.export(exportDir);
+
+            File checkpointsIndex = new File(exportDir, SavedModelBundle.CheckpointsIndex);
+            File checkpointsData = new File(exportDir, SavedModelBundle.CheckpointsData);
+
+            assertTrue(checkpointsIndex.exists());
+            assertTrue(checkpointsData.exists());
+
+        } catch (IOException e) {
+            fail();
+        }
+    }
+
 }

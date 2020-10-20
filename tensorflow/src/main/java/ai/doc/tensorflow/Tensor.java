@@ -94,7 +94,9 @@ public class Tensor implements AutoCloseable {
      */
 
     public void setBytes(ByteBuffer buffer) {
-        assert (buffer.isDirect() && buffer.order() == ByteOrder.nativeOrder());
+        if (BuildConfig.DEBUG && !(buffer.isDirect() && buffer.order() == ByteOrder.nativeOrder())) {
+            throw new AssertionError("Assertion failed");
+        }
 
         createBackingTensor();
         writeBytes(buffer, size(), dtype.c());
