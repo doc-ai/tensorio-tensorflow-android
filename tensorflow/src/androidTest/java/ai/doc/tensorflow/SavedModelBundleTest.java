@@ -509,7 +509,43 @@ public class SavedModelBundleTest {
 
     @Test
     public void testInt64Model() {
-        fail();
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("int64io_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor input = new Tensor(DataType.INT64, new int[]{1}, "input");
+            ByteBuffer buffer = byteBufferWithLongs(new long[]{2});
+            input.setBytes(buffer);
+
+            // Prepare Outputs
+
+            Tensor output = new Tensor(DataType.INT64, new int[]{1}, "output");
+
+            // Run Model
+
+            Tensor[] inputs = {input};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            ByteBuffer out = output.getBytes();
+            assertEquals(out.getLong(), 25);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     // Real World Tests

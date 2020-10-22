@@ -19,7 +19,7 @@ limitations under the License.
 
 package ai.doc.tensorflow;
 
-/** Represents the type of elements in a TensorFlow Lite {@link Tensor} as an enum. */
+/** Represents the type of elements in a TensorFlow Tensor as an enum. */
 
 // See types.pb.h for tensorflow::DataType values
 

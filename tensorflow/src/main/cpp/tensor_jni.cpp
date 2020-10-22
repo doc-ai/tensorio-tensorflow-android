@@ -82,8 +82,6 @@ Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src,
         return;
     }
 
-    // TODO: Int64 DTYPE support which iOS build supports?
-
     switch (tensorType) {
         case tensorflow::DT_FLOAT: {
             auto flat = tensor->flat<float_t>();
@@ -100,11 +98,13 @@ Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src,
             buffer = flat.data();
             break;
         }
-//        case tensorflow::DT_INT64: {
-//            auto flat = tensor->flat<int64_t>();
-//            buffer = flat.data();
-//            break;
-//        }
+        case tensorflow::DT_INT64: {
+            // int64_t ends up typed to long?
+            // which throws a DataTypeToEnum "Specified Data Type not supported error in tensorflow/core/framework/types.h
+            auto flat = tensor->flat<long long>();
+            buffer = flat.data();
+            break;
+        }
     }
 
     // works
@@ -142,11 +142,13 @@ Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size, j
             buffer = flat.data();
             break;
         }
-//        case tensorflow::DT_INT64: {
-//            auto flat = tensor->flat<int64_t>();
-//            buffer = flat.data();
-//            break;
-//        }
+        case tensorflow::DT_INT64: {
+            // int64_t ends up typed to long?
+            // which throws a DataTypeToEnum "Specified Data Type not supported error in tensorflow/core/framework/types.h
+            auto flat = tensor->flat<long long>();
+            buffer = flat.data();
+            break;
+        }
     }
 
     return env->NewDirectByteBuffer(buffer, size);
