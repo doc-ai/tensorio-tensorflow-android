@@ -100,4 +100,4 @@ packagingOptions {
 
 ## Running a Model
 
-Additional instructions forthcoming. In the meantime see the included tests.
+Additional instructions forthcoming. In the meantime see the included tests and the Java example application.

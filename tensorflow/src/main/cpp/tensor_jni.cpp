@@ -124,8 +124,6 @@ Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size, j
     auto tensorType = static_cast<tensorflow::DataType>(dtype);
     void *buffer = nullptr;
 
-    // TODO: Int64 DTYPE support which iOS build supports?
-
     switch (tensorType) {
         case tensorflow::DT_FLOAT: {
             auto flat = tensor->flat<float_t>();

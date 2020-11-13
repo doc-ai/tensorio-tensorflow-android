@@ -270,9 +270,7 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input");
-            ByteBuffer buffer = byteBufferWithFloats(new float[]{2});
-            input.setBytes(buffer);
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input", byteBufferWithFloats(new float[]{2}));
 
             // Prepare Outputs
 
@@ -311,8 +309,7 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input");
-            input.setBytes(byteBufferWithFloats(new float[] {
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input", byteBufferWithFloats(new float[] {
                     1, 2, 3, 4
             }));
 
@@ -356,13 +353,11 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input1");
-            input1.setBytes(byteBufferWithFloats(new float[] {
+            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input1", byteBufferWithFloats(new float[] {
                     1, 2, 3, 4
             }));
 
-            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input2");
-            input2.setBytes(byteBufferWithFloats(new float[] {
+            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input2", byteBufferWithFloats(new float[] {
                     10, 20, 30, 40
             }));
 
@@ -407,16 +402,14 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input1");
-            input1.setBytes(byteBufferWithFloats(new float[]{
+            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input1", byteBufferWithFloats(new float[]{
                     1,    2,    3,    4,
                     10,   20,   30,   40,
                     100,  200,  300,  400,
                     1000, 2000, 3000, 4000
             }));
 
-            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input2");
-            input2.setBytes(byteBufferWithFloats(new float[] {
+            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input2", byteBufferWithFloats(new float[] {
                     5,    6,    7,    8,
                     50,   60,   70,   80,
                     500,  600,  700,  800,
@@ -478,9 +471,7 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.INT32, new int[]{1}, "input");
-            ByteBuffer buffer = byteBufferWithInts(new int[]{2});
-            input.setBytes(buffer);
+            Tensor input = new Tensor(DataType.INT32, new int[]{1}, "input", byteBufferWithInts(new int[]{2}));
 
             // Prepare Outputs
 
@@ -522,9 +513,7 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.INT64, new int[]{1}, "input");
-            ByteBuffer buffer = byteBufferWithLongs(new long[]{2});
-            input.setBytes(buffer);
+            Tensor input = new Tensor(DataType.INT64, new int[]{1}, "input", byteBufferWithLongs(new long[]{2}));
 
             // Prepare Outputs
 
@@ -568,8 +557,7 @@ public class SavedModelBundleTest {
             InputStream stream = testContext.getAssets().open("cat.jpg");
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image");
-            input.setBytes(byteBufferWithBitmap(bitmap));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image", byteBufferWithBitmap(bitmap));
 
             // Prepare output
 
@@ -610,13 +598,11 @@ public class SavedModelBundleTest {
             InputStream stream = testContext.getAssets().open("cat.jpg");
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image");
-            input.setBytes(byteBufferWithBitmap(bitmap));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image", byteBufferWithBitmap(bitmap));
 
             // Prepare Label
 
-            Tensor labels = new Tensor(DataType.INT32, new int[]{1,1}, "labels");
-            labels.setBytes(byteBufferWithInts(new int[]{
+            Tensor labels = new Tensor(DataType.INT32, new int[]{1,1}, "labels", byteBufferWithInts(new int[]{
                     0
             }));
 
@@ -669,13 +655,11 @@ public class SavedModelBundleTest {
             InputStream stream = testContext.getAssets().open("cat.jpg");
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1, 128, 128, 3}, "image");
-            input.setBytes(byteBufferWithBitmap(bitmap));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1, 128, 128, 3}, "image", byteBufferWithBitmap(bitmap));
 
             // Prepare Label
 
-            Tensor labels = new Tensor(DataType.INT32, new int[]{1, 1}, "labels");
-            labels.setBytes(byteBufferWithInts(new int[]{
+            Tensor labels = new Tensor(DataType.INT32, new int[]{1, 1}, "labels", byteBufferWithInts(new int[]{
                     0
             }));
 
