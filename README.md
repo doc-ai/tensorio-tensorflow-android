@@ -1,6 +1,6 @@
 # Tensor/IO TensorFlow Android
 
-This library vends a full build of TensorFlow 2.0 for Android in a Java wrapper. Refer to the [r2.0.doc.ai-android](https://github.com/doc-ai/tensorflow/tree/r2.0.doc.ai-android) branch of our TensorFlow fork and specifically the [Android Build Readme](https://github.com/doc-ai/tensorflow/blob/r2.0.doc.ai-android/tensorflow/contrib/makefile/README_ANDROID_DOCAI.md) for more info.
+This library vends a full build of TensorFlow 2.0, v2.0.3 for Android in a Java wrapper. Refer to the [r2.0.doc.ai](https://github.com/doc-ai/tensorflow/tree/r2.0.doc.ai) branch of our TensorFlow fork and specifically the [Android Build Readme](https://github.com/doc-ai/tensorflow/blob/r2.0.doc.ai/tensorflow/contrib/makefile/README_ANDROID_DOCAI.md) for more info.
 
 ## Requirements:
 
@@ -25,7 +25,7 @@ Open the project folder in Android Studio, let gradle and all that jazz do its j
 
 ### Jitpack
 
-The simplest way to use this library is to import it into your project as a gradle dependency via jitpack. For detailed instructions see https://jitpack.io/#doc-ai/tensorio-tensorflow-android/0.5.1
+The simplest way to use this library is to import it into your project as a gradle dependency via jitpack. For detailed instructions see https://jitpack.io/#doc-ai/tensorio-tensorflow-android/0.6.0
 
 Add the following to your project gradle file:
 
@@ -42,7 +42,7 @@ Then add the dependency to your module's gradle file:
 
 ```groovy
 dependencies {
-  implementation 'com.github.doc-ai:tensorio-tensorflow-android:0.5.1'
+  implementation 'com.github.doc-ai:tensorio-tensorflow-android:0.6.0'
   ...
 }
 ```
