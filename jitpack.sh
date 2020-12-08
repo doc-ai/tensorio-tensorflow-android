@@ -28,6 +28,7 @@ echo "Downloading libs into distribution directory"
 RELEASE=2.0
 NDK=21.1.6352462
 API=22
+TAG=0.5.1
 
 ARCH_ARM64=arm64-v8a
 ARCH_X86_64=x86_64
@@ -39,17 +40,17 @@ LIB_TENSORFLOW=libtensorflow-core.a
 
 LIB_DIR=distribution/tensorflow/lib
 
-ARM64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_ARM64}/${LIB_NSYNC}
-ARM64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_ARM64}/${LIB_PROTO}
-ARM64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_ARM64}/${LIB_TENSORFLOW}
+ARM64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_ARM64}/${LIB_NSYNC}
+ARM64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_ARM64}/${LIB_PROTO}
+ARM64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_ARM64}/${LIB_TENSORFLOW}
 
-X86_64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_X86_64}/${LIB_NSYNC}
-X86_64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_X86_64}/${LIB_PROTO}
-X86_64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/arch/${ARCH_X86_64}/${LIB_TENSORFLOW}
+X86_64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86_64}/${LIB_NSYNC}
+X86_64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86_64}/${LIB_PROTO}
+X86_64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86_64}/${LIB_TENSORFLOW}
 
-X86_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/2.0/ndk/${NDK}/api/${API}/arch/${ARCH_X86}/${LIB_NSYNC}
-X86_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/2.0/ndk/${NDK}/api/${API}/arch/${ARCH_X86}/${LIB_PROTO}
-X86_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/2.0/ndk/${NDK}/api/${API}/arch/${ARCH_X86}/${LIB_TENSORFLOW}
+X86_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86}/${LIB_NSYNC}
+X86_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86}/${LIB_PROTO}
+X86_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86}/${LIB_TENSORFLOW}
 
 echo "Downloading arm64 libs"
 
