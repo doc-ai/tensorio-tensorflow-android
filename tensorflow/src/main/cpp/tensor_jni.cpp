@@ -21,6 +21,7 @@
 #include "tensor_jni.h"
 
 #include <vector>
+#include <android/log.h>
 
 #include "tensorflow/core/public/session.h"
 
@@ -105,6 +106,10 @@ Java_ai_doc_tensorflow_Tensor_writeBytes(JNIEnv *env, jobject thiz, jobject src,
             buffer = flat.data();
             break;
         }
+        default:
+            __android_log_print(ANDROID_LOG_ERROR, "Tensor/IO TensorFlow", "Illegal tensor type requested, must be one of float, uint8, int32, or int64");
+            ThrowException(env, kIllegalArgumentException, "Internal Error: Tensor:.writeBytes: Illegal tensor type requested");
+            break;
     }
 
     // works
@@ -123,8 +128,6 @@ Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size, j
     auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
     auto tensorType = static_cast<tensorflow::DataType>(dtype);
     void *buffer = nullptr;
-
-    // TODO: Int64 DTYPE support which iOS build supports?
 
     switch (tensorType) {
         case tensorflow::DT_FLOAT: {
@@ -149,45 +152,11 @@ Java_ai_doc_tensorflow_Tensor_readBytes(JNIEnv *env, jobject thiz, jlong size, j
             buffer = flat.data();
             break;
         }
+        default:
+            __android_log_print(ANDROID_LOG_ERROR, "Tensor/IO TensorFlow", "Illegal tensor type requested, must be one of float, uint8, int32, or int64");
+            ThrowException(env, kIllegalArgumentException, "Internal Error: Tensor.readBytes: Illegal tensor type requested");
+            break;
     }
 
     return env->NewDirectByteBuffer(buffer, size);
 }
-
-
-// Reference Code
-
-// Read and Write Single Floats
-
-//extern "C"
-//JNIEXPORT void JNICALL
-//Java_ai_doc_tensorflow_Tensor_writeFloat(JNIEnv *env, jobject thiz, jfloat value) {
-//    auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
-//    auto flat_tensor = tensor->flat<float_t>();
-//    auto buffer = flat_tensor.data();
-//
-//    float *ptr = (float*) malloc(sizeof(float)*1);
-//    ptr[0] = value;
-//
-//    // doesn't work
-//    // buffer = ptr;
-//
-//    // works
-//    // buffer[0] = ptr[0];
-//
-//    memcpy(buffer, ptr, sizeof(float)*1);
-//
-//    // works
-//    // buffer[0] = value;
-//
-//    free(ptr);
-//}
-//
-//extern "C"
-//JNIEXPORT jfloat JNICALL
-//Java_ai_doc_tensorflow_Tensor_readFloat(JNIEnv *env, jobject thiz) {
-//    auto tensor = getHandle<tensorflow::Tensor>(env, thiz);
-//    auto flat_tensor = tensor->flat<float_t>();
-//    auto buffer = flat_tensor.data();
-//    return buffer[0];
-//}

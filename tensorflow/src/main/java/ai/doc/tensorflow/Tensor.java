@@ -44,12 +44,17 @@ public class Tensor implements AutoCloseable {
         delete();
     }
 
-    // Public Constructor
+    // Public Constructors
 
     public Tensor(DataType dtype, int[] shape, String name) {
         this.dtype = dtype;
         this.shape = shape;
         this.name = name;
+    }
+
+    public Tensor(DataType dtype, int[] shape, String name, ByteBuffer bytes) {
+        this(dtype, shape, name);
+        setBytes(bytes);
     }
 
     /** Returns the {@link DataType} of elements stored in the Tensor */

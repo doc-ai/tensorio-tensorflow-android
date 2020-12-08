@@ -25,7 +25,7 @@ Open the project folder in Android Studio, let gradle and all that jazz do its j
 
 ### Jitpack
 
-The simplest way to use this library is to import it into your project as a gradle dependency via jitpack. For detailed instructions see https://jitpack.io/#doc-ai/tensorio-tensorflow-android/0.5.0
+The simplest way to use this library is to import it into your project as a gradle dependency via jitpack. For detailed instructions see https://jitpack.io/#doc-ai/tensorio-tensorflow-android/0.5.1
 
 Add the following to your project gradle file:
 
@@ -42,7 +42,7 @@ Then add the dependency to your module's gradle file:
 
 ```groovy
 dependencies {
-  implementation 'com.github.doc-ai:tensorio-tensorflow-android:0.5.0'
+  implementation 'com.github.doc-ai:tensorio-tensorflow-android:0.5.1'
   ...
 }
 ```
@@ -100,4 +100,4 @@ packagingOptions {
 
 ## Running a Model
 
-Additional instructions forthcoming. In the meantime see the included tests.
+Additional instructions forthcoming. In the meantime see the included tests and the Java example application.
