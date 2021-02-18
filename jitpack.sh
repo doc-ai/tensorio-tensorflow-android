@@ -28,7 +28,7 @@ echo "Downloading libs into distribution directory"
 RELEASE=2.0
 NDK=21.1.6352462
 API=22
-TAG=0.6.0
+TAG=0.7.0
 
 ARCH_ARM64=arm64-v8a
 ARCH_X86_64=x86_64
