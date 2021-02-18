@@ -693,4 +693,54 @@ public class SavedModelBundleTest {
         }
     }
 
+    // Tree Test
+
+    @Test
+    public void testTreeModel() {
+        try {
+            // Prepare Model
+
+            File tioBundle = bundleForFile("tree_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor survived = new Tensor(DataType.INT64, new int[]{1}, "survived", byteBufferWithLongs(new long[]{2}));
+            Tensor sex = new Tensor(DataType.INT64, new int[]{1}, "sex", byteBufferWithLongs(new long[]{2}));
+            Tensor age = new Tensor(DataType.FLOAT32, new int[]{1}, "age", byteBufferWithFloats(new float[]{2}));
+            Tensor n_siblings_spouses = new Tensor(DataType.INT64, new int[]{1}, "n_siblings_spouses", byteBufferWithLongs(new long[]{2}));
+            Tensor parch = new Tensor(DataType.INT64, new int[]{1}, "parch", byteBufferWithLongs(new long[]{2}));
+            Tensor embark_town = new Tensor(DataType.INT64, new int[]{1}, "embark_town", byteBufferWithLongs(new long[]{2}));
+            Tensor klass = new Tensor(DataType.INT64, new int[]{1}, "class", byteBufferWithLongs(new long[]{2}));
+            Tensor deck = new Tensor(DataType.INT64, new int[]{1}, "deck", byteBufferWithLongs(new long[]{2}));
+            Tensor alone = new Tensor(DataType.INT64, new int[]{1}, "alone", byteBufferWithLongs(new long[]{2}));
+
+            // Prepare Outputs
+
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "boosted_trees/BoostedTreesPredict");
+
+            // Run Model
+
+            Tensor[] inputs = {survived, sex, age, n_siblings_spouses, parch, embark_town, klass, deck, alone};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            ByteBuffer out = output.getBytes();
+            float value = out.getFloat();
+            // assertEquals(out.getFloat(), 25);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 }
