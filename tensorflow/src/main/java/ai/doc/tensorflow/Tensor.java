@@ -46,14 +46,15 @@ public class Tensor implements AutoCloseable {
 
     // Public Constructors
 
-    public Tensor(DataType dtype, int[] shape, String name) {
+    public Tensor(DataType dtype, int[] shape, boolean scalar, String name) {
         this.dtype = dtype;
         this.shape = shape;
+        this.scalar = scalar;
         this.name = name;
     }
 
-    public Tensor(DataType dtype, int[] shape, String name, ByteBuffer bytes) {
-        this(dtype, shape, name);
+    public Tensor(DataType dtype, int[] shape, boolean scalar, String name, ByteBuffer bytes) {
+        this(dtype, shape, scalar, name);
         setBytes(bytes);
     }
 
@@ -89,6 +90,12 @@ public class Tensor implements AutoCloseable {
 
     public String getName() {
         return name;
+    }
+
+    /** Returns true if this Tensor holds a scalar value, false otherwise */
+
+    public boolean isScalar() {
+        return scalar;
     }
 
     /**
@@ -131,13 +138,17 @@ public class Tensor implements AutoCloseable {
 
     private final String name;
 
+    /** Whether the Tensor holds a scalar value or one with dimension */
+
+    private final boolean scalar;
+
     // Private Methods
 
     private boolean isBacked = false;
 
     private void createBackingTensor() {
         if (!isBacked) {
-            create(dtype.c(), shape);
+            create(dtype.c(), scalar, shape);
             isBacked = true;
         }
     }
@@ -150,7 +161,7 @@ public class Tensor implements AutoCloseable {
 
     /** Allocates a tensorflow Tensor and backs this instance with it */
 
-    private native void create(int dtype, int[] shape);
+    private native void create(int dtype, boolean scalar, int[] shape);
 
     /** Frees the memory associated with the underlying tensorflow Tensor */
 
