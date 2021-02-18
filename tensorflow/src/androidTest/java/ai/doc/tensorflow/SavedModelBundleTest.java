@@ -255,6 +255,46 @@ public class SavedModelBundleTest {
     // Single Valued Tests
 
     @Test
+    public void testScalarModel() {
+        try {
+
+            // Prepare Model
+
+            File tioBundle = bundleForFile("scalar_test.tiobundle");
+            assertNotNull(tioBundle);
+
+            File modelDir = new File(tioBundle, "predict");
+
+            SavedModelBundle model = new SavedModelBundle(modelDir, Mode.Serve);
+            assertNotNull(model);
+
+            // Prepare Inputs
+
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, true, "input", byteBufferWithFloats(new float[]{2}));
+
+            // Prepare Outputs
+
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, true,"output");
+
+            // Run Model
+
+            Tensor[] inputs = {input};
+            Tensor[] outputs = {output};
+
+            model.run(inputs, outputs);
+
+            // Read Output
+
+            ByteBuffer out = output.getBytes();
+            assertEquals(out.getFloat(), 25, epsilon);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
     public void test1x1NumberModel() {
         try {
 
@@ -270,11 +310,11 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, "input", byteBufferWithFloats(new float[]{2}));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1}, false, "input", byteBufferWithFloats(new float[]{2}));
 
             // Prepare Outputs
 
-            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "output");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, false,"output");
 
             // Run Model
 
@@ -309,13 +349,13 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input", byteBufferWithFloats(new float[] {
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,4}, false,"input", byteBufferWithFloats(new float[] {
                     1, 2, 3, 4
             }));
 
             // Prepare Outputs
 
-            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1,4}, "output");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1,4}, false, "output");
 
             // Run Model
 
@@ -353,18 +393,18 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input1", byteBufferWithFloats(new float[] {
+            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{1,4}, false, "input1", byteBufferWithFloats(new float[] {
                     1, 2, 3, 4
             }));
 
-            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{1,4}, "input2", byteBufferWithFloats(new float[] {
+            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{1,4}, false, "input2", byteBufferWithFloats(new float[] {
                     10, 20, 30, 40
             }));
 
             // Prepare Outputs
 
-            Tensor output1 = new Tensor(DataType.FLOAT32, new int[]{1,1}, "output1");
-            Tensor output2 = new Tensor(DataType.FLOAT32, new int[]{1,1}, "output2");
+            Tensor output1 = new Tensor(DataType.FLOAT32, new int[]{1,1}, false, "output1");
+            Tensor output2 = new Tensor(DataType.FLOAT32, new int[]{1,1}, false, "output2");
 
             // Run Model
 
@@ -402,14 +442,14 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input1", byteBufferWithFloats(new float[]{
+            Tensor input1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, false, "input1", byteBufferWithFloats(new float[]{
                     1,    2,    3,    4,
                     10,   20,   30,   40,
                     100,  200,  300,  400,
                     1000, 2000, 3000, 4000
             }));
 
-            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "input2", byteBufferWithFloats(new float[] {
+            Tensor input2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, false, "input2", byteBufferWithFloats(new float[] {
                     5,    6,    7,    8,
                     50,   60,   70,   80,
                     500,  600,  700,  800,
@@ -418,8 +458,8 @@ public class SavedModelBundleTest {
 
             // Prepare Outputs
 
-            Tensor output1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "output1");
-            Tensor output2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, "output2");
+            Tensor output1 = new Tensor(DataType.FLOAT32, new int[]{4,4}, false, "output1");
+            Tensor output2 = new Tensor(DataType.FLOAT32, new int[]{4,4}, false, "output2");
 
             // Run Model
 
@@ -471,11 +511,11 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.INT32, new int[]{1}, "input", byteBufferWithInts(new int[]{2}));
+            Tensor input = new Tensor(DataType.INT32, new int[]{1}, false, "input", byteBufferWithInts(new int[]{2}));
 
             // Prepare Outputs
 
-            Tensor output = new Tensor(DataType.INT32, new int[]{1}, "output");
+            Tensor output = new Tensor(DataType.INT32, new int[]{1}, false, "output");
 
             // Run Model
 
@@ -513,11 +553,11 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor input = new Tensor(DataType.INT64, new int[]{1}, "input", byteBufferWithLongs(new long[]{2}));
+            Tensor input = new Tensor(DataType.INT64, new int[]{1}, false, "input", byteBufferWithLongs(new long[]{2}));
 
             // Prepare Outputs
 
-            Tensor output = new Tensor(DataType.INT64, new int[]{1}, "output");
+            Tensor output = new Tensor(DataType.INT64, new int[]{1}, false, "output");
 
             // Run Model
 
@@ -557,11 +597,11 @@ public class SavedModelBundleTest {
             InputStream stream = testContext.getAssets().open("cat.jpg");
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image", byteBufferWithBitmap(bitmap));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, false, "image", byteBufferWithBitmap(bitmap));
 
             // Prepare output
 
-            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1,1}, "sigmoid");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1,1}, false, "sigmoid");
 
             // Run Model
 
@@ -598,17 +638,17 @@ public class SavedModelBundleTest {
             InputStream stream = testContext.getAssets().open("cat.jpg");
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, "image", byteBufferWithBitmap(bitmap));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1,128,128,3}, false, "image", byteBufferWithBitmap(bitmap));
 
             // Prepare Label
 
-            Tensor labels = new Tensor(DataType.INT32, new int[]{1,1}, "labels", byteBufferWithInts(new int[]{
+            Tensor labels = new Tensor(DataType.INT32, new int[]{1,1}, false, "labels", byteBufferWithInts(new int[]{
                     0
             }));
 
             // Prepare Output
 
-            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "sigmoid_cross_entropy_loss/value");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, false, "sigmoid_cross_entropy_loss/value");
 
             // Run Training
 
@@ -655,17 +695,17 @@ public class SavedModelBundleTest {
             InputStream stream = testContext.getAssets().open("cat.jpg");
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1, 128, 128, 3}, "image", byteBufferWithBitmap(bitmap));
+            Tensor input = new Tensor(DataType.FLOAT32, new int[]{1, 128, 128, 3}, false, "image", byteBufferWithBitmap(bitmap));
 
             // Prepare Label
 
-            Tensor labels = new Tensor(DataType.INT32, new int[]{1, 1}, "labels", byteBufferWithInts(new int[]{
+            Tensor labels = new Tensor(DataType.INT32, new int[]{1, 1}, false, "labels", byteBufferWithInts(new int[]{
                     0
             }));
 
             // Prepare Output
 
-            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "sigmoid_cross_entropy_loss/value");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, false, "sigmoid_cross_entropy_loss/value");
 
             // Run Training
 
@@ -710,19 +750,19 @@ public class SavedModelBundleTest {
 
             // Prepare Inputs
 
-            Tensor survived = new Tensor(DataType.INT64, new int[]{1}, "survived", byteBufferWithLongs(new long[]{2}));
-            Tensor sex = new Tensor(DataType.INT64, new int[]{1}, "sex", byteBufferWithLongs(new long[]{2}));
-            Tensor age = new Tensor(DataType.FLOAT32, new int[]{1}, "age", byteBufferWithFloats(new float[]{2}));
-            Tensor n_siblings_spouses = new Tensor(DataType.INT64, new int[]{1}, "n_siblings_spouses", byteBufferWithLongs(new long[]{2}));
-            Tensor parch = new Tensor(DataType.INT64, new int[]{1}, "parch", byteBufferWithLongs(new long[]{2}));
-            Tensor embark_town = new Tensor(DataType.INT64, new int[]{1}, "embark_town", byteBufferWithLongs(new long[]{2}));
-            Tensor klass = new Tensor(DataType.INT64, new int[]{1}, "class", byteBufferWithLongs(new long[]{2}));
-            Tensor deck = new Tensor(DataType.INT64, new int[]{1}, "deck", byteBufferWithLongs(new long[]{2}));
-            Tensor alone = new Tensor(DataType.INT64, new int[]{1}, "alone", byteBufferWithLongs(new long[]{2}));
+            Tensor survived = new Tensor(DataType.INT64, new int[]{1}, false, "survived", byteBufferWithLongs(new long[]{2}));
+            Tensor sex = new Tensor(DataType.INT64, new int[]{1}, false, "sex", byteBufferWithLongs(new long[]{2}));
+            Tensor age = new Tensor(DataType.FLOAT32, new int[]{1}, false, "age", byteBufferWithFloats(new float[]{2}));
+            Tensor n_siblings_spouses = new Tensor(DataType.INT64, new int[]{1}, false, "n_siblings_spouses", byteBufferWithLongs(new long[]{2}));
+            Tensor parch = new Tensor(DataType.INT64, new int[]{1}, false, "parch", byteBufferWithLongs(new long[]{2}));
+            Tensor embark_town = new Tensor(DataType.INT64, new int[]{1}, false, "embark_town", byteBufferWithLongs(new long[]{2}));
+            Tensor klass = new Tensor(DataType.INT64, new int[]{1}, false, "class", byteBufferWithLongs(new long[]{2}));
+            Tensor deck = new Tensor(DataType.INT64, new int[]{1}, false, "deck", byteBufferWithLongs(new long[]{2}));
+            Tensor alone = new Tensor(DataType.INT64, new int[]{1}, false, "alone", byteBufferWithLongs(new long[]{2}));
 
             // Prepare Outputs
 
-            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, "boosted_trees/BoostedTreesPredict");
+            Tensor output = new Tensor(DataType.FLOAT32, new int[]{1}, false, "boosted_trees/BoostedTreesPredict");
 
             // Run Model
 
@@ -734,8 +774,7 @@ public class SavedModelBundleTest {
             // Read Output
 
             ByteBuffer out = output.getBytes();
-            float value = out.getFloat();
-            // assertEquals(out.getFloat(), 25);
+            assertEquals(out.getFloat(), 56.928, epsilon);
 
         } catch (IOException e) {
             e.printStackTrace();

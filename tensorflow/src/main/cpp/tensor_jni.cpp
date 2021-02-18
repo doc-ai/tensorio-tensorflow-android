@@ -35,7 +35,7 @@ jstring GetTensorName(JNIEnv *env, jobject obj) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_ai_doc_tensorflow_Tensor_create(JNIEnv *env, jobject thiz, jint dtype, jintArray shape) {
+Java_ai_doc_tensorflow_Tensor_create(JNIEnv *env, jobject thiz, jint dtype, jboolean scalar, jintArray shape) {
 
     // Prepare Shape
 
@@ -43,8 +43,14 @@ Java_ai_doc_tensorflow_Tensor_create(JNIEnv *env, jobject thiz, jint dtype, jint
     jint *jShape = env->GetIntArrayElements(shape, nullptr);
     jsize shapeCount = env->GetArrayLength(shape);
 
-    for (jsize i = 0; i < shapeCount; i++) {
-        dims.push_back(jShape[i]);
+    // If scalar first dimension may be -1 or fixed batch size, but all other dimensions will be 1 and can be ignored
+
+    if (scalar) {
+        dims.push_back(jShape[0]);
+    } else {
+        for (jsize i = 0; i < shapeCount; i++) {
+            dims.push_back(jShape[i]);
+        }
     }
 
     tensorflow::gtl::ArraySlice<tensorflow::int64> dim_sizes(dims);
