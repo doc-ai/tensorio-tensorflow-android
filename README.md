@@ -2,11 +2,13 @@
 
 This library vends a full build of TensorFlow 2.0, v2.0.3 for Android in a Java wrapper. Refer to the [r2.0.doc.ai](https://github.com/doc-ai/tensorflow/tree/r2.0.doc.ai) branch of our TensorFlow fork and specifically the [Android Build Readme](https://github.com/doc-ai/tensorflow/blob/r2.0.doc.ai/tensorflow/contrib/makefile/README_ANDROID_DOCAI.md) for more info.
 
+The *react-native* branch builds TensorFlow with Android NDK 20.1.598944 instead of 21.1.6352462 which is used for normal releases.
+
 ## Requirements:
 
 Ensure the following have been installed in Android Studio:
 
-- Android NDK 21.1.6352462
+- Android NDK 20.1.598944
 - Android Cmake 3.10.2
 
 You can do this in Preferences: Appearance and Behavoir > System Settings > Android SDK > SDK Tools. Click on Show Package Contents at the bottom right and expand the NDK and CMake options to select the appropriate packages.
@@ -42,7 +44,7 @@ Then add the dependency to your module's gradle file:
 
 ```groovy
 dependencies {
-  implementation 'com.github.doc-ai:tensorio-tensorflow-android:0.8.0'
+  implementation 'com.github.doc-ai:tensorio-tensorflow-android:reactnative-SNAPSHOT'
   ...
 }
 ```

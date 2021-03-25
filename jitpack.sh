@@ -26,9 +26,9 @@
 echo "Downloading libs into distribution directory"
 
 RELEASE=2.0
-NDK=21.1.6352462
+NDK=20.1.598944
 API=22
-TAG=0.8.0
+TAG=react-native/0.8.0
 
 ARCH_ARM64=arm64-v8a
 ARCH_X86_64=x86_64
