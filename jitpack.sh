@@ -26,7 +26,7 @@
 echo "Downloading libs into distribution directory"
 
 RELEASE=2.0
-NDK=20.1.598944
+NDK=20.1.5948944
 API=22
 TAG=react-native/0.8.0
 
